@@ -19,29 +19,36 @@ function Realments(props) {
       key: index,
       errors: errors,
       classes: classes,
-      ...field
+      ...field,
     };
+
+    // Normalize addable prop for frontend use
+    const normalizedField = {
+      ...commonProps,
+      add: field.addable ?? field.add ?? false,
+    };
+
     switch (field.type) {
       case 'text':
-        return <TextInput {...commonProps} />;
+        return <TextInput {...normalizedField} />;
       case 'email':
-        return <EmailInput {...commonProps} />;
+        return <EmailInput {...normalizedField} />;
       case 'password':
-        return <PasswordInput {...commonProps} />;
+        return <PasswordInput {...normalizedField} />;
       case 'number':
-        return <NumberInput {...commonProps} />;
+        return <NumberInput {...normalizedField} />;
       case 'date':
-        return <DateInput {...commonProps} />;
+        return <DateInput {...normalizedField} />;
       case 'textarea':
-        return <TextareaInput {...commonProps} />;
+        return <TextareaInput {...normalizedField} />;
       case 'select':
-        return <SelectInput {...commonProps} />;
+        return <SelectInput {...normalizedField} />;
       case 'file':
-        return <FileInput {...commonProps} />;
+        return <FileInput {...normalizedField} />;
       case 'checkbox':
-        return <CheckboxInput {...commonProps} />;
+        return <CheckboxInput {...normalizedField} />;
       case 'radio':
-        return <RadioInput {...commonProps} />;
+        return <RadioInput {...normalizedField} />;
       default:
         return null;
     }

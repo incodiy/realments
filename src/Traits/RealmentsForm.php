@@ -3,74 +3,95 @@ namespace Incodiy\Realments\Traits;
 
 trait RealmentsForm
 {
+    protected $fields = [];
+    protected $formAttributes = [];
+
     public function open($attrs = [])
     {
-        app('realments')->open($attrs);
+        $this->formAttributes = $attrs;
+
+        // Set default classes jika belum ada
+        if (!isset($this->formAttributes['classes'])) {
+            $this->formAttributes['classes'] = [
+                'input'  => 'border border-gray-300 p-2 rounded w-full',
+                'label'  => 'block font-medium mb-1',
+                'error'  => 'text-red-600 text-sm mt-1',
+                'button' => 'bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded',
+            ];
+        }
+
+        // Errors default kosong jika tidak ada
+        if (!isset($this->formAttributes['errors'])) {
+            $this->formAttributes['errors'] = [];
+        }
+
         return $this;
     }
 
-    public function close()
+    protected function addField($type, $name, $attrs = [])
     {
-        return app('realments')->close();
-    }
+        $attrs['type'] = $type;
+        $attrs['name'] = $name;
 
-    public function text($name, $attrs = [])
-    {
-        app('realments')->text($name, $attrs);
+        if (isset($attrs['addable'])) {
+            $attrs['add'] = $attrs['addable'];
+            unset($attrs['addable']);
+        }
+
+        $this->fields[] = $attrs;
+
         return $this;
     }
 
-    public function email($name, $attrs = [])
+    public function text($name, $attrs = [])    { return $this->addField('text', $name, $attrs); }
+    public function email($name, $attrs = [])   { return $this->addField('email', $name, $attrs); }
+    public function password($name, $attrs = []){ return $this->addField('password', $name, $attrs); }
+    public function number($name, $attrs = [])  { return $this->addField('number', $name, $attrs); }
+    public function date($name, $attrs = [])    { return $this->addField('date', $name, $attrs); }
+    public function textarea($name, $attrs = []){ return $this->addField('textarea', $name, $attrs); }
+    public function select($name, $attrs = [])  { return $this->addField('select', $name, $attrs); }
+    public function file($name, $attrs = [])    { return $this->addField('file', $name, $attrs); }
+    public function checkbox($name, $attrs = []){ return $this->addField('checkbox', $name, $attrs); }
+    public function radio($name, $attrs = [])   { return $this->addField('radio', $name, $attrs); }
+
+    public function close($submitLabel = 'Submit')
     {
-        app('realments')->email($name, $attrs);
+        $this->formAttributes['submitLabel'] = $submitLabel;
+
+        // Set final data for render
+        $data = [
+            'action'      => $this->formAttributes['action'] ?? '',
+            'method'      => $this->formAttributes['method'] ?? 'POST',
+            'fields'      => $this->fields,
+            'errors'      => $this->formAttributes['errors'] ?? [],
+            'classes'     => $this->formAttributes['classes'] ?? [
+                'input'  => 'border border-gray-300 p-2 rounded w-full',
+                'label'  => 'block font-medium mb-1',
+                'error'  => 'text-red-600 text-sm mt-1',
+                'button' => 'bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded',
+            ],
+            'submitLabel' => $submitLabel,
+        ];
+
+        $this->formAttributes = $data;
+
         return $this;
     }
 
-    public function password($name, $attrs = [])
+    public function render()
     {
-        app('realments')->password($name, $attrs);
-        return $this;
+        // Return html + script for React to consume
+        return '<script>window.realmentsData = ' . json_encode($this->formAttributes) . ';</script><div id="realmentsForm"></div>';
     }
 
-    public function number($name, $attrs = [])
+    // Optional: getter fields dan formAttributes, kalau mau manual akses
+    public function getFields()
     {
-        app('realments')->number($name, $attrs);
-        return $this;
+        return $this->fields;
     }
 
-    public function date($name, $attrs = [])
+    public function getFormAttributes()
     {
-        app('realments')->date($name, $attrs);
-        return $this;
-    }
-
-    public function textarea($name, $attrs = [])
-    {
-        app('realments')->textarea($name, $attrs);
-        return $this;
-    }
-
-    public function select($name, $attrs = [])
-    {
-        app('realments')->select($name, $attrs);
-        return $this;
-    }
-
-    public function file($name, $attrs = [])
-    {
-        app('realments')->file($name, $attrs);
-        return $this;
-    }
-
-    public function checkbox($name, $attrs = [])
-    {
-        app('realments')->checkbox($name, $attrs);
-        return $this;
-    }
-
-    public function radio($name, $attrs = [])
-    {
-        app('realments')->radio($name, $attrs);
-        return $this;
+        return $this->formAttributes;
     }
 }
