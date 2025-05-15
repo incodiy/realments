@@ -1,0 +1,31 @@
+{
+  "name": "incodiy/realments",
+  "description": "Laravel + React form builder for dynamic input elements",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "IncoDIY",
+      "email": "incodiy@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.2",
+    "illuminate/support": "^8.0|^9.0|^10.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Incodiy\\Realments\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Incodiy\\Realments\\RealmentsServiceProvider"
+      ],
+      "aliases": {
+        "Realments": "Incodiy\\Realments\\Realments"
+      }
+    }
+  }
+}
