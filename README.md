@@ -1,10 +1,37 @@
-# Incodiy Realments
+# incodiy/realments
 
-**Realments** adalah Laravel package yang menyederhanakan proses pembuatan form dinamis berbasis **React** dari Laravel controller tanpa perlu menulis view Blade atau JSX langsung.
+`incodiy/realments` adalah Laravel + React package yang dirancang untuk menyederhanakan proses pembuatan form HTML dinamis menggunakan komponen React yang fleksibel dan dapat digunakan ulang.
 
-## 🌟 Fitur Utama
+---
 
-* Integrasi otomatis dengan React.
+## 🌟 Tujuan
+
+Menyediakan cara mudah dan efisien untuk membangun elemen form HTML yang kompleks menggunakan pendekatan deklaratif dari Laravel dan kekuatan interaktif dari React.
+
+---
+
+## 🧬 Teknologi yang Digunakan
+
+* **Laravel** (Backend)
+* **React.js** (Frontend)
+* **Vite** (Asset bundler)
+* **TailwindCSS / Bootstrap** (Dukungan UI Framework dinamis)
+
+---
+
+## 🚀 Fungsi / Kegunaan
+
+* Mempermudah pembuatan form dinamis dari Laravel controller.
+* Mendukung berbagai jenis input HTML.
+* Komponen React siap pakai & dapat dikustomisasi.
+* Dukungan multiple form secara dinamis dalam satu halaman.
+* Otomatis integrasi error & old value dari Laravel.
+
+---
+
+## ✨ Fitur Utama
+
+* Input Dinamis: text, email, password, number, textarea, date, file, select, checkbox, radio
 * Komponen input seperti:
 
   * Select
@@ -20,166 +47,11 @@
 * Dynamic add input (bisa tambah field dengan button).
 * Integrasi validasi & error display Laravel.
 * Output otomatis komponen React langsung dari controller.
-* CSS Framework agnostik (support Bootstrap, Tailwind, dll).
 * Bisa digunakan secara plug-and-play di project Laravel lain.
-
----
-
-## 📦 Instalasi
-
-### 1. Install Package via Composer
-
-```bash
-composer require incodiy/realments
-```
-
-### 2. Publish Asset & View
-
-```bash
-php artisan vendor:publish --provider="Incodiy\Realments\RealmentsServiceProvider"
-```
-
-### 3. Include Komponen Blade
-
-Di view manapun, tambahkan directive:
-
-```blade
-@realmentsForm
-```
-
-### 4. Setup Asset (Tanpa Build Sendiri)
-
-Pastikan file JS `realments.js` sudah ter-publish di `public/vendor/realments/js/realments.js`. Kamu tidak perlu build manual jika hanya menggunakan komponen default dari package.
-
-Jika kamu ingin melakukan build ulang, lihat bagian `🔧 Development & Build`.
-
----
-
-## ⚙️ Penggunaan di Controller
-
-### Form Open dan Close
-
-```php
-$this->open(['method' => 'POST', 'action' => route('submit.route')]);
-
-// Tambahkan input...
-
-$this->close([
-    'button' => true,
-    'button_label' => 'Submit',
-    'button_class' => 'btn btn-primary'
-]);
-```
-
-### Contoh Input Element
-
-```php
-$this->select('pilihan negara', [
-    null,
-    'indonesia',
-    'malaysia',
-    'singapore'
-], [
-    'class' => 'form-control',
-    'multiselect' => true,
-    'label' => true,
-    'add_button' => true,
-    'max_add' => 5,
-    'selected' => ['malaysia', 'singapore']
-]);
-
-$this->text('nama lengkap', [
-    'placeholder' => 'Masukkan nama...',
-    'add_button' => true,
-    'max_add' => 3,
-    'selected' => ['John Doe']
-]);
-
-$this->email('email pengguna');
-$this->password('kata sandi');
-$this->file('unggah dokumen');
-$this->textarea('deskripsi');
-$this->date('tanggal lahir');
-$this->number('jumlah anak');
-$this->checkbox('hobi', ['musik', 'olahraga']);
-$this->radio('gender', ['pria', 'wanita']);
-```
-
----
-
-## 📄 Validasi & Error
-
-Validasi otomatis akan diterima dari response Laravel jika error dikirim sebagai JSON dengan format standar:
-
-```json
-{
-  "errors": {
-    "nama_lengkap": ["Nama harus diisi."]
-  }
-}
-```
-
-Realments akan otomatis menampilkan error tersebut pada komponen terkait.
-
----
-
-## 🎨 Styling
-
-* Komponen disusun agar bisa menerima semua atribut HTML standar (`class`, `id`, `style`, dsb).
-* Styling disesuaikan dengan framework CSS yang kamu pakai (Tailwind, Bootstrap, dsb).
-
-Contoh:
-
-```php
-$this->text('nama', ['class' => 'form-control text-red-600']);
-```
-
----
-
-## 🔧 Development & Build (Opsional)
-
-Jika kamu ingin melakukan perubahan di komponen React-nya:
-
-### 1. Install NPM dependencies
-
-```bash
-cd packages/incodiy/realments
-npm install
-```
-
-### 2. Build dengan Laravel Mix
-
-```bash
-npm run dev
-```
-
-Atau untuk production:
-
-```bash
-npm run production
-```
-
-Output akan berada di:
-
-```
-public/vendor/realments/js/realments.js
-```
-
-### 3. Build dengan Vite (alternatif)
-
-Pastikan kamu sudah install plugin:
-
-```bash
-npm install --save-dev @vitejs/plugin-react
-```
-
-Kemudian edit `vite.config.js` di root Laravel-mu agar juga membaca `vendor/realments/resources/js`.
-
-Contoh penggunaan direktif:
-
-```blade
-@vite('vendor/realments/resources/js/realments.js')
-```
+* CSS Framework agnostik (support Bootstrap, Tailwind, dll).
+* Dukungan framework UI: Tailwind (default), Bootstrap (bisa disesuaikan)
+* Multiple form rendering
+* Load otomatis React & realments.js saat form dipanggil
 
 ---
 
@@ -197,11 +69,206 @@ packages/
         │           └── ...lainnya
         ├── views/
         │   └── index.blade.php
-        ├── routes/
-        │   └── api.php
+        │   └── scripts.blade.php
         ├── RealmentsServiceProvider.php
         └── composer.json
 ```
+
+---
+
+## ⚖️ Instalasi
+
+```bash
+composer require incodiy/realments
+```
+
+```bash
+php artisan vendor:publish --tag=realments-config
+php artisan vendor:publish --tag=realments-assets
+```
+
+```bash
+npm install && npm run build
+```
+
+---
+
+## 🔄 Cara Menggunakan
+
+### 1. Tambahkan di Controller
+
+```php
+use Incodiy\Realments\Facades\Realments;
+
+Realments::open('/submit-url')
+    ->text('name', 'Full Name')
+    ->email('email', 'Email Address')
+    ->close();
+
+$realmentForms = Realments::renderForms();
+return view('realments.index', compact('realmentForms'));
+```
+
+### 2. Di Blade View
+
+```blade
+{!! $realmentForms !!}
+@include('realments.scripts')
+```
+
+> Catatan: File `scripts.blade.php` akan me-load React & realments.js otomatis.
+
+---
+
+## 🔢 Komponen Input yang Tersedia
+
+Setiap method menerima parameter umum:
+
+* `name`: nama input
+* `label`: teks label
+* `attributes`: (opsional) array atribut tambahan seperti `placeholder`, `class`, `required`, dll.
+
+### Text
+
+```php
+->text('username', 'Username', ['placeholder' => 'Enter your name'])
+```
+
+### Email
+
+```php
+->email('email', 'Email', ['required' => true])
+```
+
+### Password
+
+```php
+->password('password', 'Password')
+```
+
+### Number
+
+```php
+->number('age', 'Age', ['min' => 0])
+```
+
+### Date
+
+```php
+->date('dob', 'Date of Birth')
+```
+
+### Textarea
+
+```php
+->textarea('bio', 'Biography', ['rows' => 5])
+```
+
+### Select
+
+```php
+->select('role', 'Role', ['admin' => 'Admin', 'user' => 'User'], ['multiple' => true])
+```
+
+### File
+
+```php
+->file('avatar', 'Upload Photo')
+```
+
+### Checkbox
+
+```php
+->checkbox('agree', 'I Agree to Terms')
+```
+
+### Radio
+
+```php
+->radio('gender', 'Gender', ['m' => 'Male', 'f' => 'Female'])
+```
+
+---
+
+## 🚀 Multiple Forms
+
+Panggil beberapa kali:
+
+```php
+Realments::open('/form-1')->text('a', 'A')->close();
+Realments::open('/form-2')->text('b', 'B')->close();
+```
+
+Semua akan digabung otomatis dengan `Realments::renderForms()`.
+
+---
+
+### 11. Select dengan Tombol Add (Addable)
+
+```php
+$this->select('tags', [
+    'label'    => 'Select or Add Tags',
+    'options'  => ['news', 'tech', 'sports'],
+    'multiple' => true,
+    'addable'  => true,
+]);
+```
+
+#### Penjelasan:
+
+| Parameter  | Tipe    | Deskripsi                                        |
+| ---------- | ------- | ------------------------------------------------ |
+| `options`  | array   | Daftar pilihan awal                              |
+| `multiple` | boolean | Pilih banyak opsi                                |
+| `addable`  | boolean | Aktifkan input + tombol untuk menambah opsi baru |
+| `label`    | string  | Label untuk select box                           |
+
+---
+
+## 🧩 Konfigurasi
+
+Publish konfigurasi dengan:
+
+```bash
+php artisan vendor:publish --tag=realments-config
+```
+
+Konfigurasikan framework CSS di `config/realments.php`:
+
+```php
+return [
+    'framework' => 'tailwind', // atau 'bootstrap'
+];
+```
+
+Ubah default framework CSS:
+
+```php
+// config/realments.php
+return [
+    'framework' => 'tailwind',
+
+    'tailwind' => [
+        'label' => 'block text-sm font-medium text-gray-700',
+        'input' => 'mt-1 block w-full rounded-md border-gray-300 shadow-sm',
+        'button' => 'inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded'
+    ],
+
+    'bootstrap' => [
+        'label' => 'form-label',
+        'input' => 'form-control',
+        'button' => 'btn btn-primary'
+    ]
+];
+```
+
+
+---
+
+## 📁 Struktur Folder View
+
+* `resources/views/vendor/realments/index.blade.php`
+* `resources/views/vendor/realments/scripts.blade.php`
 
 ---
 
@@ -216,10 +283,16 @@ packages/
 
 ## ❤️ Credits
 
-Developed by [Incodiy Labs](https://github.com/incodiy)
+Dikembangkan oleh [Incodiy Labs](https://github.com/incodiy) untuk kebutuhan form builder modular Laravel + React.
 
 ---
 
-## 📄 Lisensi
+## 👋 Kontribusi
+
+- OnLoad...
+
+---
+
+## 📊 Lisensi
 
 MIT License

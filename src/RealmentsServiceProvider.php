@@ -25,15 +25,13 @@ class RealmentsServiceProvider extends ServiceProvider
 
         // Publish compiled React assets
         $this->publishes([
-            // __DIR__.'/../public/vendor/realments/js/realments.js' => public_path('vendor/realments/js/realments.js'),
-            // __DIR__.'/../resources/js/realments/index.js' => resource_path('js/realments/index.js'),
             __DIR__.'/../resources/js/' => resource_path('js/'),
             __DIR__.'/../resources/views/' => resource_path('views/'),
         ], 'realments-assets');
 
         // Publish views
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'realments');
-        
+        /*
         // Blade directive custom
         \Blade::directive('realmentsForm', function () {
             return "<?php echo view('realments::index')->render(); ?>";
@@ -41,6 +39,6 @@ class RealmentsServiceProvider extends ServiceProvider
 
         \Blade::directive('realmentsScripts', function () {
             return "<?php echo view('realments::scripts')->render(); ?>";
-        });
+        });*/
     }
 }

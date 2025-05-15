@@ -19,11 +19,18 @@ class Realments
         return $this;
     }
 
+    protected array $formsBuffer = [];
+
     /**
      * Close the form: prepare data and return HTML for React.
      */
-    public function close()
+    public function close($id = null)
     {
+        static $formCount = 0;
+        $formCount++;
+
+        $id = 'realmentsForm_' . uniqid() . '_' . $formCount;
+        
         // Prepare data to pass to React
         $data = [
             'fields'    => $this->fields,
@@ -35,6 +42,11 @@ class Realments
             'classes'   => config("realments.{$this->framework}")
         ];
 
+        // Simpan ke sesi agar bisa diakses dari view
+        $existing = session()->get('realmentsData', []);
+        $existing[$id] = $data;
+        session()->put('realmentsData', $existing);
+        
         // Reset fields for reuse
         $this->fields = [];
         $this->action = '';
@@ -48,26 +60,24 @@ class Realments
         $jsonData = htmlspecialchars_decode($jsonData, ENT_QUOTES);
 
         // Return container and mounting scripts
-        return <<<HTML
-<div id="realmentsForm"></div>
+        // return "<div id=\"{$id}\"></div>";
 
-<!-- Load React and ReactDOM first -->
-<script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-
+        $html = <<<HTML
+<div id="{$id}"></div>
 <script>
-    // Pass data to React via a global variable
-    window.realmentsData = JSON.parse('{$jsonData}');
+    window.realmentsData = window.realmentsData || {};
+    window.realmentsData['{$id}'] = JSON.parse('{$jsonData}');
 </script>
-<script src="/vendor/realments/js/realments.js"></script>
-<!-- <script>
-    // Render the React form into the container
-    ReactDOM.render(
-        React.createElement(Realments, window.realmentsData),
-        document.getElementById('realmentsForm')
-    );
-</script> -->
 HTML;
+
+        $this->formsBuffer[] = $html;
+
+        return ''; // Optional: return single form if needed
+    }
+
+    public function render()
+    {
+        return implode("\n", $this->formsBuffer);
     }
 
     /**
