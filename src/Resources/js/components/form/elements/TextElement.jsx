@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+/**
+ * TextElement Component
+ * 
+ * Renders a text input field with label and error handling.
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.element - Element configuration object
+ * @param {string} props.element.name - Input field name
+ * @param {string} props.element.label - Label text
+ * @param {boolean} props.element.show_label - Whether to show the label
+ * @param {Object} props.element.attributes - HTML attributes for the input
+ * @param {string} props.errorMessage - Error message to display (if any)
+ * @param {string|null} props.value - Initial value for the input
+ * @param {string} props.cssFramework - CSS framework to use (bootstrap, tailwind, bulma)
+ * @param {string} props.themeMode - Theme mode (light, dark)
+ * @returns {React.ReactElement} Text input element with label and error handling
+ */
 const TextElement = ({ element, errorMessage, value, cssFramework, themeMode }) => {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
@@ -13,17 +30,27 @@ const TextElement = ({ element, errorMessage, value, cssFramework, themeMode }) 
     attributes
   } = element;
   
-  // Initialize input value
+  /**
+   * Initialize input value when props change
+   */
   useEffect(() => {
     setInputValue(value || '');
   }, [value]);
   
-  // Handle input change
+  /**
+   * Handle input change event
+   * 
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Change event
+   */
   const handleChange = (e) => {
     setInputValue(e.target.value);
   };
   
-  // Get CSS classes based on framework
+  /**
+   * Get CSS classes based on framework and theme
+   * 
+   * @returns {Object} Object containing CSS classes for different elements
+   */
   const getClasses = () => {
     const classes = {
       formGroup: '',

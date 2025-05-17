@@ -7,55 +7,84 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * FormBuilder Class
+ * 
+ * Main class for building form elements with Laravel and React integration.
+ * This class provides methods to create various form elements with simple syntax
+ * and handles the rendering of these elements using React components.
+ * 
+ * @package Incodiy\Realments\Services
+ */
 class FormBuilder
 {
     /**
      * Form elements collection
+     * 
+     * @var array
      */
     protected $elements = [];
     
     /**
      * Current form ID
+     * 
+     * @var string
      */
     protected $formId;
     
     /**
      * Form attributes
+     * 
+     * @var array
      */
     protected $formAttributes = [];
     
     /**
      * Form method
+     * 
+     * @var string
      */
     protected $method = 'POST';
     
     /**
      * Form action URL
+     * 
+     * @var string
      */
     protected $action = '';
     
     /**
      * Form enctype
+     * 
+     * @var string
      */
     protected $enctype = 'application/x-www-form-urlencoded';
     
     /**
      * Current element being built
+     * 
+     * @var array|null
      */
     protected $currentElement = null;
     
     /**
      * CSS Framework
+     * 
+     * @var string
      */
     protected $cssFramework = 'bootstrap';
     
     /**
      * Theme mode
+     * 
+     * @var string
      */
     protected $themeMode = 'light';
     
     /**
      * Constructor
+     * 
+     * Initializes a new FormBuilder instance with default settings
      */
     public function __construct()
     {
@@ -66,8 +95,17 @@ class FormBuilder
     
     /**
      * Open a form
+     * 
+     * Creates the opening form tag with specified attributes and settings.
      *
-     * @param array $attributes
+     * @param array $attributes Form attributes and settings
+     *                          - id: Form ID (optional, auto-generated if not provided)
+     *                          - method: HTTP method (GET, POST, PUT, DELETE)
+     *                          - action: Form submission URL
+     *                          - enctype: Form encoding type
+     *                          - files: Whether form includes file uploads (boolean)
+     *                          - css_framework: CSS framework to use (bootstrap, tailwind, bulma)
+     *                          - theme_mode: Theme mode (light, dark)
      * @return $this
      */
     public function open(array $attributes = [])
@@ -127,9 +165,11 @@ class FormBuilder
     
     /**
      * Close a form
+     * 
+     * Creates the closing form tag and optionally adds a submit button.
      *
-     * @param string|null $submitText
-     * @param array $attributes
+     * @param string|null $submitText Text for the submit button, or null to omit button
+     * @param array $attributes Additional attributes for the submit button
      * @return $this
      */
     public function close($submitText = 'Submit', array $attributes = [])
@@ -152,7 +192,9 @@ class FormBuilder
         
         // Add form close element
         $this->elements[] = [
-            'type' => 'form_close'
+            'type' => 'form_close',
+            'submitText' => $submitText,
+            'submitAttributes' => $attributes
         ];
         
         return $this;
@@ -160,10 +202,22 @@ class FormBuilder
     
     /**
      * Create a select element
+     * 
+     * Creates a dropdown select element with options.
      *
-     * @param string $name
-     * @param array $values
-     * @param array $attributes
+     * @param string $name Element name
+     * @param array $values Array of options (key => value pairs)
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - multiselect: Whether multiple selection is allowed (boolean)
+     *                          - selected: Pre-selected value(s) (string or array)
+     *                          - add_button: Whether to show add button for dynamic additions (boolean)
+     *                          - max_additions: Maximum number of additions allowed
+     *                          - button_position: Position of add button (right, bottom)
+     *                          - button_class: CSS class for add button
+     *                          - button_text: Text for add button
+     *                          - added_items: Pre-added items
      * @return $this
      */
     public function select($name, array $values, array $attributes = [])
@@ -245,10 +299,17 @@ class FormBuilder
     
     /**
      * Create a text input element
+     * 
+     * Creates a standard text input field.
      *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
+     * @param string $name Element name
+     * @param string $value Default value
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - placeholder: Placeholder text
+     *                          - required: Whether field is required (boolean)
+     *                          - class: Additional CSS classes
      * @return $this
      */
     public function text($name, $value = null, array $attributes = [])
@@ -287,10 +348,18 @@ class FormBuilder
     
     /**
      * Create a textarea element
+     * 
+     * Creates a multi-line text input area, optionally with WYSIWYG editor.
      *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
+     * @param string $name Element name
+     * @param string $value Default value
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - rows: Number of visible text rows
+     *                          - wysiwyg: Whether to enable WYSIWYG editor (boolean)
+     *                          - editor: WYSIWYG editor type (tinymce, ckeditor, quill)
+     *                          - editor_config: Configuration options for the editor
      * @return $this
      */
     public function textarea($name, $value = null, array $attributes = [])
@@ -337,11 +406,15 @@ class FormBuilder
     
     /**
      * Create a checkbox element
+     * 
+     * Creates a single checkbox input.
      *
-     * @param string $name
-     * @param string $value
-     * @param bool $checked
-     * @param array $attributes
+     * @param string $name Element name
+     * @param string $value Value when checked
+     * @param bool $checked Whether checkbox is initially checked
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
      * @return $this
      */
     public function checkbox($name, $value = '1', $checked = false, array $attributes = [])
@@ -381,11 +454,14 @@ class FormBuilder
     
     /**
      * Create a radio element
+     * 
+     * Creates a group of radio button inputs.
      *
-     * @param string $name
-     * @param array $options
-     * @param string $checked
-     * @param array $attributes
+     * @param string $name Element name
+     * @param array $options Array of options (key => value pairs)
+     * @param string $checked Value of the initially checked option
+     * @param array $attributes Additional attributes and settings
+     *                          - label: Custom label text or false to hide label
      * @return $this
      */
     public function radio($name, array $options, $checked = null, array $attributes = [])
@@ -434,11 +510,15 @@ class FormBuilder
     
     /**
      * Create a switch element
+     * 
+     * Creates a toggle switch input.
      *
-     * @param string $name
-     * @param string $value
-     * @param bool $checked
-     * @param array $attributes
+     * @param string $name Element name
+     * @param string $value Value when switched on
+     * @param bool $checked Whether switch is initially on
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
      * @return $this
      */
     public function switch($name, $value = '1', $checked = false, array $attributes = [])
@@ -478,9 +558,15 @@ class FormBuilder
     
     /**
      * Create a password input element
+     * 
+     * Creates a password input field with masked text.
      *
-     * @param string $name
-     * @param array $attributes
+     * @param string $name Element name
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - placeholder: Placeholder text
+     *                          - required: Whether field is required (boolean)
      * @return $this
      */
     public function password($name, array $attributes = [])
@@ -517,594 +603,12 @@ class FormBuilder
     }
     
     /**
-     * Create an email input element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function email($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'email',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a number input element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function number($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'number',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a date input element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function date($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'date',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a time input element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function time($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'time',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a datetime input element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function datetime($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'datetime',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a date range input element
-     *
-     * @param string $name
-     * @param array $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function dateRange($name, array $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'daterange',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a file input element
-     *
-     * @param string $name
-     * @param array $attributes
-     * @return $this
-     */
-    public function file($name, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Thumbnail settings
-        $thumbnail = [
-            'enabled' => isset($attributes['thumbnail']) && $attributes['thumbnail'] === true,
-            'size' => $attributes['thumbnail_size'] ?? 150,
-            'position' => $attributes['thumbnail_position'] ?? 'top'
-        ];
-        
-        // Create element data
-        $element = [
-            'type' => 'file',
-            'name' => $formattedName,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'thumbnail' => $thumbnail,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a hidden input element
-     *
-     * @param string $name
-     * @param string $value
-     * @return $this
-     */
-    public function hidden($name, $value = null)
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create element data
-        $element = [
-            'type' => 'hidden',
-            'name' => $formattedName,
-            'value' => $value,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a range input element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function range($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'range',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a color input element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function color($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'color',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a tags input element
-     *
-     * @param string $name
-     * @param array $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function tags($name, array $value = [], array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'tags',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a rich text editor element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $attributes
-     * @return $this
-     */
-    public function richText($name, $value = null, array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Set editor type
-        $editorType = $attributes['editor'] ?? 'tinymce'; // Options: tinymce, ckeditor, quill
-        
-        // Create element data
-        $element = [
-            'type' => 'richtext',
-            'name' => $formattedName,
-            'value' => $value,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'editor' => $editorType,
-            'editor_config' => $attributes['editor_config'] ?? [],
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create a captcha element
-     *
-     * @param string $name
-     * @param array $attributes
-     * @return $this
-     */
-    public function captcha($name = 'captcha', array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'captcha',
-            'name' => $formattedName,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
-     * Create an autocomplete element
-     *
-     * @param string $name
-     * @param string $value
-     * @param array $options
-     * @param array $attributes
-     * @return $this
-     */
-    public function autocomplete($name, $value = null, array $options = [], array $attributes = [])
-    {
-        // Format name for HTML attributes (lowercase, replace spaces with dashes)
-        $formattedName = Str::slug($name, '-');
-        
-        // Create label text with first letter of each word capitalized
-        $labelText = Str::title($name);
-        
-        // Set ID if not provided
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = $formattedName . '_' . Str::random(5);
-        }
-        
-        // Check if label should be displayed
-        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
-        
-        // Create element data
-        $element = [
-            'type' => 'autocomplete',
-            'name' => $formattedName,
-            'value' => $value,
-            'options' => $options,
-            'label' => $labelText,
-            'show_label' => $showLabel,
-            'attributes' => $attributes,
-            'css_framework' => $this->cssFramework,
-            'theme_mode' => $this->themeMode
-        ];
-        
-        $this->elements[] = $element;
-        $this->currentElement = $element;
-        
-        return $this;
-    }
-    
-    /**
      * Set validation rules for the current element
+     * 
+     * Adds validation rules to the most recently created element.
      *
-     * @param array|string $rules
-     * @param array $messages
+     * @param string|array $rules Validation rules in Laravel format
+     * @param array $messages Custom error messages for validation rules
      * @return $this
      */
     public function rules($rules, array $messages = [])
@@ -1124,71 +628,64 @@ class FormBuilder
     }
     
     /**
-     * Render the form elements
+     * Render the form
+     * 
+     * Renders the complete form with all its elements.
      *
-     * @return string
+     * @return string Rendered HTML
      */
     public function render()
     {
-        // Convert elements to JSON for React
-        $elementsJson = json_encode($this->elements);
+        // Get old input and errors from session
+        $oldInput = Session::get('_old_input', []);
+        $errors = Session::get('errors') ? Session::get('errors')->getBag('default')->toArray() : [];
         
-        // Get validation errors if any
-        $errors = session()->get('errors');
-        $errorBag = $errors ? json_encode($errors->getBag('default')->toArray()) : '{}';
-        
-        // Get old input if any
-        $oldInput = json_encode(session()->getOldInput());
-        
-        // Generate a unique ID for the form container
-        $containerId = 'realments_' . Str::random(8);
-        
-        // Render the view with the form data
-        return View::make('realments::form', [
-            'containerId' => $containerId,
-            'elements' => $elementsJson,
-            'errors' => $errorBag,
+        // Prepare data for the view
+        $viewData = [
+            'formId' => $this->formId,
+            'elements' => $this->elements,
+            'errors' => $errors,
             'oldInput' => $oldInput,
             'cssFramework' => $this->cssFramework,
             'themeMode' => $this->themeMode
-        ])->render();
+        ];
+        
+        // Render the view
+        return View::make('realments::form', $viewData)->render();
     }
     
     /**
      * Get default button class based on CSS framework
+     * 
+     * Returns the appropriate button class for the current CSS framework.
      *
-     * @param string $size
-     * @return string
+     * @param string $size Button size (sm, md, lg)
+     * @return string CSS class string
      */
     protected function getDefaultButtonClass($size = '')
     {
-        $sizeClass = '';
-        
-        if ($size) {
-            switch ($this->cssFramework) {
-                case 'bootstrap':
-                    $sizeClass = $size === 'sm' ? 'btn-sm' : ($size === 'lg' ? 'btn-lg' : '');
-                    break;
-                case 'tailwind':
-                    $sizeClass = $size === 'sm' ? 'text-sm py-1 px-2' : ($size === 'lg' ? 'text-lg py-3 px-6' : '');
-                    break;
-                case 'bulma':
-                    $sizeClass = $size === 'sm' ? 'is-small' : ($size === 'lg' ? 'is-large' : '');
-                    break;
-                default:
-                    $sizeClass = '';
-            }
-        }
+        $class = '';
         
         switch ($this->cssFramework) {
             case 'bootstrap':
-                return 'btn btn-primary ' . $sizeClass;
+                $class = 'btn btn-primary';
+                if ($size === 'sm') $class .= ' btn-sm';
+                if ($size === 'lg') $class .= ' btn-lg';
+                break;
             case 'tailwind':
-                return 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ' . $sizeClass;
+                $class = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded';
+                if ($size === 'sm') $class = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm';
+                if ($size === 'lg') $class = 'bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded text-lg';
+                break;
             case 'bulma':
-                return 'button is-primary ' . $sizeClass;
+                $class = 'button is-primary';
+                if ($size === 'sm') $class .= ' is-small';
+                if ($size === 'lg') $class .= ' is-large';
+                break;
             default:
-                return '';
+                $class = 'btn btn-primary';
         }
+        
+        return $class;
     }
 }

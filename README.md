@@ -4,54 +4,54 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/incodiy/realments.svg?style=flat-square)](https://packagist.org/packages/incodiy/realments)
 [![License](https://img.shields.io/packagist/l/incodiy/realments.svg?style=flat-square)](https://packagist.org/packages/incodiy/realments)
 
-Realments is a powerful Laravel and React form builder package that allows you to create dynamic form elements with just a few lines of code in your Laravel controller.
+Realments adalah package Laravel dan React yang powerful untuk membuat form input data dengan mudah melalui kode sederhana di controller Laravel.
 
-## Features
+## Fitur
 
-- Create form elements with simple Laravel controller code
-- Supports various input types (text, textarea, select, checkbox, radio, etc.)
-- WYSIWYG editor integration for rich text editing
-- Dynamic CSS framework support (Bootstrap, Tailwind, Bulma)
-- Dark mode and light mode support
-- Internationalization (i18n) for multi-language support
-- Client-side and server-side validation
-- Error display integration with Laravel validation
-- Add button feature for dynamic element addition
-- Responsive design for mobile and desktop
+- Membuat elemen form dengan kode Laravel controller yang sederhana
+- Mendukung berbagai tipe input (text, textarea, select, checkbox, radio, dll)
+- Integrasi WYSIWYG editor untuk rich text editing
+- Dukungan CSS framework dinamis (Bootstrap, Tailwind, Bulma)
+- Dukungan tema gelap (dark mode) dan tema terang (light mode)
+- Internasionalisasi (i18n) untuk multi-bahasa
+- Validasi client-side dan server-side
+- Integrasi error display dengan validasi Laravel
+- Fitur add button untuk penambahan elemen dinamis
+- Desain responsif untuk mobile dan desktop
 
-## Requirements
+## Persyaratan
 
-- PHP 8.1 or higher
-- Laravel 10.x or 12.x
-- Node.js and NPM for frontend assets
+- PHP 8.1 atau lebih tinggi
+- Laravel 10.x, 11.x, atau 12.x
+- Node.js dan NPM untuk asset frontend
 
-## Installation
+## Instalasi
 
-### 1. Install the package via Composer
+### 1. Instal package melalui Composer
 
 ```bash
 composer require incodiy/realments
 ```
 
-### 2. Publish the package assets
+### 2. Publish asset package
 
 ```bash
 php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-assets"
 ```
 
-### 3. Publish the configuration file (optional)
+### 3. Publish file konfigurasi (opsional)
 
 ```bash
 php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-config"
 ```
 
-### 4. Publish the language files (optional)
+### 4. Publish file bahasa (opsional)
 
 ```bash
 php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-lang"
 ```
 
-### 5. Add the Realments facade to your `config/app.php` file (Laravel 10 only)
+### 5. Tambahkan Realments facade ke file `config/app.php` (Laravel 10 saja)
 
 ```php
 'aliases' => [
@@ -60,31 +60,53 @@ php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServ
 ],
 ```
 
-## Basic Usage
+### 6. Instal dependensi NPM dan build assets
 
-### Form Open and Close
+Setelah menginstal package melalui Composer, Anda perlu menginstal dependensi NPM dan build assets React:
+
+```bash
+# Pindah ke direktori project Laravel Anda
+cd /path/to/your/laravel/project
+
+# Instal dependensi NPM
+npm install
+
+# Build assets untuk production
+npm run build
+```
+
+Atau jika Anda menggunakan Yarn:
+
+```bash
+yarn install
+yarn build
+```
+
+## Penggunaan Dasar
+
+### Form Open dan Close
 
 ```php
-// In your controller
+// Di controller Anda
 public function create()
 {
     $form = app('realments');
     
-    // Open form
+    // Buka form
     $form->open([
         'action' => route('users.store'),
         'method' => 'POST',
-        'files' => true, // If you need file uploads
-        'css_framework' => 'bootstrap', // Options: bootstrap, tailwind, bulma
-        'theme_mode' => 'light' // Options: light, dark
+        'files' => true, // Jika Anda memerlukan upload file
+        'css_framework' => 'bootstrap', // Pilihan: bootstrap, tailwind, bulma
+        'theme_mode' => 'light' // Pilihan: light, dark
     ]);
     
-    // Add form elements here...
+    // Tambahkan elemen form di sini...
     
-    // Close form with submit button
+    // Tutup form dengan tombol submit
     $form->close('Submit');
     
-    // Render the form
+    // Render form
     return view('users.create', [
         'form' => $form->render()
     ]);
@@ -94,15 +116,15 @@ public function create()
 ### Select Box
 
 ```php
-// Basic select box
+// Select box dasar
 $form->select('country', [
-    'Select a country', // First option is empty by default
+    'Select a country', // Opsi pertama kosong secara default
     'usa' => 'United States',
     'canada' => 'Canada',
     'uk' => 'United Kingdom'
 ]);
 
-// Select box with selected value
+// Select box dengan nilai terpilih
 $form->select('country', [
     'Select a country',
     'usa' => 'United States',
@@ -123,7 +145,7 @@ $form->select('countries', [
     'selected' => ['usa', 'uk']
 ]);
 
-// Select box with add button
+// Select box dengan tombol add
 $form->select('skills', [
     'Select a skill',
     'php' => 'PHP',
@@ -132,12 +154,12 @@ $form->select('skills', [
 ], [
     'add_button' => true,
     'max_additions' => 5,
-    'button_position' => 'right', // Options: right, bottom
+    'button_position' => 'right', // Pilihan: right, bottom
     'button_text' => 'Add Skill',
     'button_class' => 'btn btn-sm btn-secondary',
     'added_items' => [
-        ['php'], // First added item with PHP selected
-        ['js']   // Second added item with JavaScript selected
+        ['php'], // Item pertama dengan PHP terpilih
+        ['js']   // Item kedua dengan JavaScript terpilih
     ]
 ]);
 ```
@@ -145,17 +167,17 @@ $form->select('skills', [
 ### Text Input
 
 ```php
-// Basic text input
+// Input text dasar
 $form->text('name', 'John Doe');
 
-// Text input with attributes
+// Input text dengan atribut
 $form->text('name', 'John Doe', [
     'placeholder' => 'Enter your name',
     'class' => 'custom-class',
     'required' => true
 ]);
 
-// Text input with validation rules
+// Input text dengan aturan validasi
 $form->text('email', 'john@example.com')
     ->rules('required|email');
 ```
@@ -163,13 +185,13 @@ $form->text('email', 'john@example.com')
 ### Textarea
 
 ```php
-// Basic textarea
+// Textarea dasar
 $form->textarea('description', 'Lorem ipsum dolor sit amet');
 
-// Textarea with WYSIWYG editor
+// Textarea dengan WYSIWYG editor
 $form->textarea('content', '<p>Hello World</p>', [
     'wysiwyg' => true,
-    'editor' => 'tinymce', // Options: tinymce, ckeditor, quill
+    'editor' => 'tinymce', // Pilihan: tinymce, ckeditor, quill
     'editor_config' => [
         'height' => 300,
         'plugins' => 'link image code'
@@ -177,7 +199,7 @@ $form->textarea('content', '<p>Hello World</p>', [
 ]);
 ```
 
-### Checkbox, Radio, and Switch
+### Checkbox, Radio, dan Switch
 
 ```php
 // Checkbox
@@ -194,32 +216,32 @@ $form->radio('gender', [
 $form->switch('notifications', '1', true);
 ```
 
-### Password, Email, and Number
+### Password, Email, dan Number
 
 ```php
-// Password input
+// Input password
 $form->password('password');
 
-// Email input
+// Input email
 $form->email('email', 'john@example.com');
 
-// Number input
+// Input number
 $form->number('age', 25, [
     'min' => 18,
     'max' => 100
 ]);
 ```
 
-### Date, Time, and DateTime
+### Date, Time, dan DateTime
 
 ```php
-// Date input
+// Input date
 $form->date('birth_date', '1990-01-01');
 
-// Time input
+// Input time
 $form->time('meeting_time', '14:30');
 
-// DateTime input
+// Input DateTime
 $form->datetime('appointment', '2023-05-15T14:30');
 
 // Date range
@@ -229,14 +251,14 @@ $form->dateRange('vacation', ['2023-06-01', '2023-06-15']);
 ### File Upload
 
 ```php
-// Basic file upload
+// Upload file dasar
 $form->file('document');
 
-// File upload with thumbnail preview
+// Upload file dengan thumbnail preview
 $form->file('profile_picture', [
     'thumbnail' => true,
     'thumbnail_size' => 150,
-    'thumbnail_position' => 'top', // Options: top, bottom
+    'thumbnail_position' => 'top', // Pilihan: top, bottom
     'accept' => 'image/*'
 ]);
 ```
@@ -247,7 +269,7 @@ $form->file('profile_picture', [
 $form->hidden('user_id', 123);
 ```
 
-### Range, Color, Tags, and RichText
+### Range, Color, Tags, dan RichText
 
 ```php
 // Range slider
@@ -269,7 +291,7 @@ $form->richText('article', '<h1>Article Title</h1><p>Content goes here...</p>', 
 ]);
 ```
 
-### Captcha and Autocomplete
+### Captcha dan Autocomplete
 
 ```php
 // Captcha
@@ -285,12 +307,12 @@ $form->autocomplete('city', 'New York', [
 ]);
 ```
 
-## Advanced Usage
+## Penggunaan Lanjutan
 
-### Validation
+### Validasi
 
 ```php
-// Server-side validation in controller
+// Validasi server-side di controller
 public function store(Request $request)
 {
     $validated = $request->validate([
@@ -299,12 +321,12 @@ public function store(Request $request)
         'password' => 'required|min:8|confirmed',
     ]);
     
-    // If validation fails, errors will be automatically displayed in the form
+    // Jika validasi gagal, error akan otomatis ditampilkan di form
     
-    // Process the form...
+    // Proses form...
 }
 
-// Client-side validation in form builder
+// Validasi client-side di form builder
 $form->text('name')
     ->rules('required|max:255');
 
@@ -315,29 +337,29 @@ $form->password('password')
     ->rules('required|min:8');
 ```
 
-### Internationalization (i18n)
+### Internasionalisasi (i18n)
 
 ```php
-// In config/realments.php
+// Di config/realments.php
 'i18n' => [
     'default_locale' => 'en',
     'fallback_locale' => 'en',
     'available_locales' => ['en', 'id', 'es', 'fr'],
 ],
 
-// In controller
+// Di controller
 $form->open([
-    'locale' => 'id' // Set the form language
+    'locale' => 'id' // Set bahasa form
 ]);
 ```
 
-### CSS Framework Customization
+### Kustomisasi CSS Framework
 
 ```php
-// In config/realments.php
+// Di config/realments.php
 'default_css_framework' => 'bootstrap',
 
-// In controller
+// Di controller
 $form->open([
     'css_framework' => 'tailwind'
 ]);
@@ -346,18 +368,57 @@ $form->open([
 ### Theme Mode
 
 ```php
-// In config/realments.php
+// Di config/realments.php
 'default_theme_mode' => 'light',
 
-// In controller
+// Di controller
 $form->open([
     'theme_mode' => 'dark'
 ]);
 ```
 
-## Documentation
+## Kompatibilitas Laravel
 
-For full documentation, visit our [GitHub Pages](https://incodiy.github.io/realments/).
+Realments mendukung Laravel versi 10.x, 11.x, dan 12.x. Berikut adalah panduan kompatibilitas:
+
+### Laravel 10.x
+- Tambahkan Facade ke `config/app.php`
+- Semua fitur didukung penuh
+
+### Laravel 11.x dan 12.x
+- Tidak perlu menambahkan Facade secara manual
+- Semua fitur didukung penuh
+- Gunakan auto-discovery untuk service provider
+
+## Troubleshooting
+
+### Asset tidak ditemukan
+
+Jika Anda mendapatkan error 404 untuk file JavaScript, pastikan:
+
+1. Anda telah menjalankan `npm run build` setelah instalasi
+2. Anda telah mempublish asset dengan `php artisan vendor:publish --tag=realments-assets`
+3. Direktori `public/vendor/incodiy/realments` ada dan berisi file JavaScript
+
+Jika masalah berlanjut, coba:
+
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+```
+
+### Error saat build
+
+Jika Anda mendapatkan error saat menjalankan `npm run build`, pastikan:
+
+1. Anda menggunakan Node.js versi 14 atau lebih tinggi
+2. Semua dependensi NPM terinstal dengan benar
+3. Tidak ada konflik dengan package lain
+
+## Dokumentasi
+
+Untuk dokumentasi lengkap, kunjungi [GitHub Pages](https://incodiy.github.io/realments/) kami.
 
 ## Testing
 
@@ -365,19 +426,19 @@ For full documentation, visit our [GitHub Pages](https://incodiy.github.io/realm
 composer test
 ```
 
-## Contributing
+## Kontribusi
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Silakan lihat [CONTRIBUTING](CONTRIBUTING.md) untuk detail.
 
-## Security
+## Keamanan
 
-If you discover any security related issues, please email info@incodiy.com instead of using the issue tracker.
+Jika Anda menemukan masalah keamanan, silakan kirim email ke info@incodiy.com daripada menggunakan issue tracker.
 
-## Credits
+## Kredit
 
 - [Incodiy](https://github.com/incodiy)
-- [All Contributors](../../contributors)
+- [Semua Kontributor](../../contributors)
 
-## License
+## Lisensi
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Silakan lihat [License File](LICENSE.md) untuk informasi lebih lanjut.

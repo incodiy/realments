@@ -1,6 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+/**
+ * SelectElement Component
+ * 
+ * Renders a select dropdown with options, supporting single and multiple selection,
+ * dynamic item addition, and various styling based on the CSS framework.
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.element - Element configuration object
+ * @param {string} props.element.name - Select field name
+ * @param {string} props.element.label - Label text
+ * @param {boolean} props.element.show_label - Whether to show the label
+ * @param {Array} props.element.options - Array of options objects with value, label, and selected properties
+ * @param {boolean} props.element.multiselect - Whether multiple selection is allowed
+ * @param {Object} props.element.attributes - HTML attributes for the select
+ * @param {Object} props.element.add_button - Configuration for add button functionality
+ * @param {string} props.errorMessage - Error message to display (if any)
+ * @param {string|Array|null} props.value - Initial value(s) for the select
+ * @param {string} props.cssFramework - CSS framework to use (bootstrap, tailwind, bulma)
+ * @param {string} props.themeMode - Theme mode (light, dark)
+ * @returns {React.ReactElement} Select element with options, label, and error handling
+ */
 const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }) => {
   const { t } = useTranslation();
   const [selectedValues, setSelectedValues] = useState([]);
@@ -17,7 +38,9 @@ const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }
     add_button 
   } = element;
   
-  // Initialize selected values
+  /**
+   * Initialize selected values and added items when props change
+   */
   useEffect(() => {
     if (value) {
       const values = Array.isArray(value) ? value : [value];
@@ -39,7 +62,12 @@ const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }
     }
   }, [value, options, add_button]);
   
-  // Handle select change
+  /**
+   * Handle select change event
+   * 
+   * @param {React.ChangeEvent<HTMLSelectElement>} e - Change event
+   * @param {number|null} itemIndex - Index of the added item being changed, or null for main select
+   */
   const handleChange = (e, itemIndex = null) => {
     const select = e.target;
     let newValues = [];
@@ -63,21 +91,31 @@ const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }
     }
   };
   
-  // Add new item
+  /**
+   * Add new select item
+   */
   const handleAddItem = () => {
     if (add_button.enabled && addedItems.length < add_button.max) {
       setAddedItems([...addedItems, []]);
     }
   };
   
-  // Remove item
+  /**
+   * Remove select item at specified index
+   * 
+   * @param {number} index - Index of the item to remove
+   */
   const handleRemoveItem = (index) => {
     const updatedItems = [...addedItems];
     updatedItems.splice(index, 1);
     setAddedItems(updatedItems);
   };
   
-  // Get CSS classes based on framework
+  /**
+   * Get CSS classes based on framework and theme
+   * 
+   * @returns {Object} Object containing CSS classes for different elements
+   */
   const getClasses = () => {
     const classes = {
       formGroup: '',
@@ -141,7 +179,13 @@ const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }
   
   const classes = getClasses();
   
-  // Render select element
+  /**
+   * Render select element with options
+   * 
+   * @param {Array} values - Currently selected values
+   * @param {number|null} itemIndex - Index of the added item, or null for main select
+   * @returns {React.ReactElement} Select element with options
+   */
   const renderSelect = (values, itemIndex = null) => {
     const selectId = itemIndex !== null ? `${attributes.id}_${itemIndex}` : attributes.id;
     const selectName = itemIndex !== null ? `${name}[${itemIndex}]${multiselect ? '[]' : ''}` : `${name}${multiselect ? '[]' : ''}`;
