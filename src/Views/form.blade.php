@@ -3,9 +3,9 @@
 $containerId = $containerId ?? 'realments-form-' . uniqid();
 
 // Ensure all required variables are available with defaults
-$elements = $elements ?? '[]';
-$errors = $errors ?? '{}';
-$oldInput = $oldInput ?? '{}';
+$elements = @json($elements) ?? '[]';
+$errors = @json($errors) ?? '{}';
+$oldInput = @json($oldInput) ?? '{}';
 $cssFramework = $cssFramework ?? config('realments.default_css_framework', 'bootstrap');
 $themeMode = $themeMode ?? config('realments.default_theme_mode', 'light');
 ?>

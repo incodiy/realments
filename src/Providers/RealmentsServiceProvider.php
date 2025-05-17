@@ -60,7 +60,8 @@ class RealmentsServiceProvider extends ServiceProvider
         // Publish assets
         $this->publishes([
             __DIR__.'/../Resources/js' => resource_path('js/vendor/incodiy/realments'),
-            __DIR__.'/../dist' => public_path('vendor/incodiy/realments'),
+            // __DIR__.'/../dist' => public_path('vendor/incodiy/realments'),
+            // __DIR__ . '/../Resources/css' => resource_path('css/vendor/incodiy/realments'),
         ], 'realments-assets');
         
         // Register Blade components
