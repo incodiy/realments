@@ -1,298 +1,383 @@
-# incodiy/realments
+# Incodiy Realments
 
-`incodiy/realments` adalah Laravel + React package yang dirancang untuk menyederhanakan proses pembuatan form HTML dinamis menggunakan komponen React yang fleksibel dan dapat digunakan ulang.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/incodiy/realments.svg?style=flat-square)](https://packagist.org/packages/incodiy/realments)
+[![Total Downloads](https://img.shields.io/packagist/dt/incodiy/realments.svg?style=flat-square)](https://packagist.org/packages/incodiy/realments)
+[![License](https://img.shields.io/packagist/l/incodiy/realments.svg?style=flat-square)](https://packagist.org/packages/incodiy/realments)
 
----
+Realments is a powerful Laravel and React form builder package that allows you to create dynamic form elements with just a few lines of code in your Laravel controller.
 
-## 🌟 Tujuan
+## Features
 
-Menyediakan cara mudah dan efisien untuk membangun elemen form HTML yang kompleks menggunakan pendekatan deklaratif dari Laravel dan kekuatan interaktif dari React.
+- Create form elements with simple Laravel controller code
+- Supports various input types (text, textarea, select, checkbox, radio, etc.)
+- WYSIWYG editor integration for rich text editing
+- Dynamic CSS framework support (Bootstrap, Tailwind, Bulma)
+- Dark mode and light mode support
+- Internationalization (i18n) for multi-language support
+- Client-side and server-side validation
+- Error display integration with Laravel validation
+- Add button feature for dynamic element addition
+- Responsive design for mobile and desktop
 
----
+## Requirements
 
-## 🧬 Teknologi yang Digunakan
+- PHP 8.1 or higher
+- Laravel 10.x or 12.x
+- Node.js and NPM for frontend assets
 
-* **Laravel** (Backend)
-* **React.js** (Frontend)
-* **Vite** (Asset bundler)
-* **TailwindCSS / Bootstrap** (Dukungan UI Framework dinamis)
+## Installation
 
----
-
-## 🚀 Fungsi / Kegunaan
-
-* Mempermudah pembuatan form dinamis dari Laravel controller.
-* Mendukung berbagai jenis input HTML.
-* Komponen React siap pakai & dapat dikustomisasi.
-* Dukungan multiple form secara dinamis dalam satu halaman.
-* Otomatis integrasi error & old value dari Laravel.
-
----
-
-## ✨ Fitur Utama
-
-* Input Dinamis: text, email, password, number, textarea, date, file, select, checkbox, radio
-* Komponen input seperti:
-
-  * Select
-  * Text
-  * Textarea
-  * File upload
-  * Password
-  * Email
-  * Number
-  * Date
-  * Checkbox
-  * Radio
-* Dynamic add input (bisa tambah field dengan button).
-* Integrasi validasi & error display Laravel.
-* Output otomatis komponen React langsung dari controller.
-* Bisa digunakan secara plug-and-play di project Laravel lain.
-* CSS Framework agnostik (support Bootstrap, Tailwind, dll).
-* Dukungan framework UI: Tailwind (default), Bootstrap (bisa disesuaikan)
-* Multiple form rendering
-* Load otomatis React & realments.js saat form dipanggil
-
----
-
-## 📁 Struktur Direktori
-
-```
-packages/
-└── incodiy/
-    └── realments/
-        ├── resources/
-        │   └── js/
-        │       └── components/
-        │           ├── Text.jsx
-        │           ├── Select.jsx
-        │           └── ...lainnya
-        ├── views/
-        │   └── index.blade.php
-        │   └── scripts.blade.php
-        ├── RealmentsServiceProvider.php
-        └── composer.json
-```
-
----
-
-## ⚖️ Instalasi
+### 1. Install the package via Composer
 
 ```bash
 composer require incodiy/realments
 ```
 
-```bash
-php artisan vendor:publish --tag=realments-config
-php artisan vendor:publish --tag=realments-assets
-```
+### 2. Publish the package assets
 
 ```bash
-npm install && npm run build
+php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-assets"
 ```
 
----
+### 3. Publish the configuration file (optional)
 
-## 🔄 Cara Menggunakan
+```bash
+php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-config"
+```
 
-### 1. Tambahkan di Controller
+### 4. Publish the language files (optional)
+
+```bash
+php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-lang"
+```
+
+### 5. Add the Realments facade to your `config/app.php` file (Laravel 10 only)
 
 ```php
-use Incodiy\Realments\Facades\Realments;
-
-Realments::open('/submit-url')
-    ->text('name', 'Full Name')
-    ->email('email', 'Email Address')
-    ->close();
-
-$realmentForms = Realments::renderForms();
-return view('realments.index', compact('realmentForms'));
+'aliases' => [
+    // ...
+    'Realments' => Incodiy\Realments\Facades\Realments::class,
+],
 ```
 
-### 2. Di Blade View
+## Basic Usage
 
-```blade
-{!! $realmentForms !!}
-@include('realments.scripts')
-```
-
-> Catatan: File `scripts.blade.php` akan me-load React & realments.js otomatis.
-
----
-
-## 🔢 Komponen Input yang Tersedia
-
-Setiap method menerima parameter umum:
-
-* `name`: nama input
-* `label`: teks label
-* `attributes`: (opsional) array atribut tambahan seperti `placeholder`, `class`, `required`, dll.
-
-### Text
+### Form Open and Close
 
 ```php
-->text('username', 'Username', ['placeholder' => 'Enter your name'])
+// In your controller
+public function create()
+{
+    $form = app('realments');
+    
+    // Open form
+    $form->open([
+        'action' => route('users.store'),
+        'method' => 'POST',
+        'files' => true, // If you need file uploads
+        'css_framework' => 'bootstrap', // Options: bootstrap, tailwind, bulma
+        'theme_mode' => 'light' // Options: light, dark
+    ]);
+    
+    // Add form elements here...
+    
+    // Close form with submit button
+    $form->close('Submit');
+    
+    // Render the form
+    return view('users.create', [
+        'form' => $form->render()
+    ]);
+}
 ```
 
-### Email
+### Select Box
 
 ```php
-->email('email', 'Email', ['required' => true])
+// Basic select box
+$form->select('country', [
+    'Select a country', // First option is empty by default
+    'usa' => 'United States',
+    'canada' => 'Canada',
+    'uk' => 'United Kingdom'
+]);
+
+// Select box with selected value
+$form->select('country', [
+    'Select a country',
+    'usa' => 'United States',
+    'canada' => 'Canada',
+    'uk' => 'United Kingdom'
+], [
+    'selected' => 'usa'
+]);
+
+// Multi-select box
+$form->select('countries', [
+    'Select countries',
+    'usa' => 'United States',
+    'canada' => 'Canada',
+    'uk' => 'United Kingdom'
+], [
+    'multiselect' => true,
+    'selected' => ['usa', 'uk']
+]);
+
+// Select box with add button
+$form->select('skills', [
+    'Select a skill',
+    'php' => 'PHP',
+    'js' => 'JavaScript',
+    'python' => 'Python'
+], [
+    'add_button' => true,
+    'max_additions' => 5,
+    'button_position' => 'right', // Options: right, bottom
+    'button_text' => 'Add Skill',
+    'button_class' => 'btn btn-sm btn-secondary',
+    'added_items' => [
+        ['php'], // First added item with PHP selected
+        ['js']   // Second added item with JavaScript selected
+    ]
+]);
 ```
 
-### Password
+### Text Input
 
 ```php
-->password('password', 'Password')
-```
+// Basic text input
+$form->text('name', 'John Doe');
 
-### Number
+// Text input with attributes
+$form->text('name', 'John Doe', [
+    'placeholder' => 'Enter your name',
+    'class' => 'custom-class',
+    'required' => true
+]);
 
-```php
-->number('age', 'Age', ['min' => 0])
-```
-
-### Date
-
-```php
-->date('dob', 'Date of Birth')
+// Text input with validation rules
+$form->text('email', 'john@example.com')
+    ->rules('required|email');
 ```
 
 ### Textarea
 
 ```php
-->textarea('bio', 'Biography', ['rows' => 5])
-```
+// Basic textarea
+$form->textarea('description', 'Lorem ipsum dolor sit amet');
 
-### Select
-
-```php
-->select('role', 'Role', ['admin' => 'Admin', 'user' => 'User'], ['multiple' => true])
-```
-
-### File
-
-```php
-->file('avatar', 'Upload Photo')
-```
-
-### Checkbox
-
-```php
-->checkbox('agree', 'I Agree to Terms')
-```
-
-### Radio
-
-```php
-->radio('gender', 'Gender', ['m' => 'Male', 'f' => 'Female'])
-```
-
----
-
-## 🚀 Multiple Forms
-
-Panggil beberapa kali:
-
-```php
-Realments::open('/form-1')->text('a', 'A')->close();
-Realments::open('/form-2')->text('b', 'B')->close();
-```
-
-Semua akan digabung otomatis dengan `Realments::renderForms()`.
-
----
-
-### 11. Select dengan Tombol Add (Addable)
-
-```php
-$this->select('tags', [
-    'label'    => 'Select or Add Tags',
-    'options'  => ['news', 'tech', 'sports'],
-    'multiple' => true,
-    'addable'  => true,
+// Textarea with WYSIWYG editor
+$form->textarea('content', '<p>Hello World</p>', [
+    'wysiwyg' => true,
+    'editor' => 'tinymce', // Options: tinymce, ckeditor, quill
+    'editor_config' => [
+        'height' => 300,
+        'plugins' => 'link image code'
+    ]
 ]);
 ```
 
-#### Penjelasan:
+### Checkbox, Radio, and Switch
 
-| Parameter  | Tipe    | Deskripsi                                        |
-| ---------- | ------- | ------------------------------------------------ |
-| `options`  | array   | Daftar pilihan awal                              |
-| `multiple` | boolean | Pilih banyak opsi                                |
-| `addable`  | boolean | Aktifkan input + tombol untuk menambah opsi baru |
-| `label`    | string  | Label untuk select box                           |
+```php
+// Checkbox
+$form->checkbox('agree_terms', '1', true);
 
----
+// Radio buttons
+$form->radio('gender', [
+    'male' => 'Male',
+    'female' => 'Female',
+    'other' => 'Other'
+], 'male');
 
-## 🧩 Konfigurasi
+// Switch
+$form->switch('notifications', '1', true);
+```
 
-Publish konfigurasi dengan:
+### Password, Email, and Number
+
+```php
+// Password input
+$form->password('password');
+
+// Email input
+$form->email('email', 'john@example.com');
+
+// Number input
+$form->number('age', 25, [
+    'min' => 18,
+    'max' => 100
+]);
+```
+
+### Date, Time, and DateTime
+
+```php
+// Date input
+$form->date('birth_date', '1990-01-01');
+
+// Time input
+$form->time('meeting_time', '14:30');
+
+// DateTime input
+$form->datetime('appointment', '2023-05-15T14:30');
+
+// Date range
+$form->dateRange('vacation', ['2023-06-01', '2023-06-15']);
+```
+
+### File Upload
+
+```php
+// Basic file upload
+$form->file('document');
+
+// File upload with thumbnail preview
+$form->file('profile_picture', [
+    'thumbnail' => true,
+    'thumbnail_size' => 150,
+    'thumbnail_position' => 'top', // Options: top, bottom
+    'accept' => 'image/*'
+]);
+```
+
+### Hidden Input
+
+```php
+$form->hidden('user_id', 123);
+```
+
+### Range, Color, Tags, and RichText
+
+```php
+// Range slider
+$form->range('rating', 5, [
+    'min' => 0,
+    'max' => 10,
+    'step' => 1
+]);
+
+// Color picker
+$form->color('theme_color', '#3490dc');
+
+// Tags input
+$form->tags('keywords', ['laravel', 'react']);
+
+// Rich text editor
+$form->richText('article', '<h1>Article Title</h1><p>Content goes here...</p>', [
+    'editor' => 'tinymce'
+]);
+```
+
+### Captcha and Autocomplete
+
+```php
+// Captcha
+$form->captcha();
+
+// Autocomplete
+$form->autocomplete('city', 'New York', [
+    'New York',
+    'Los Angeles',
+    'Chicago',
+    'Houston',
+    'Phoenix'
+]);
+```
+
+## Advanced Usage
+
+### Validation
+
+```php
+// Server-side validation in controller
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:8|confirmed',
+    ]);
+    
+    // If validation fails, errors will be automatically displayed in the form
+    
+    // Process the form...
+}
+
+// Client-side validation in form builder
+$form->text('name')
+    ->rules('required|max:255');
+
+$form->email('email')
+    ->rules('required|email');
+
+$form->password('password')
+    ->rules('required|min:8');
+```
+
+### Internationalization (i18n)
+
+```php
+// In config/realments.php
+'i18n' => [
+    'default_locale' => 'en',
+    'fallback_locale' => 'en',
+    'available_locales' => ['en', 'id', 'es', 'fr'],
+],
+
+// In controller
+$form->open([
+    'locale' => 'id' // Set the form language
+]);
+```
+
+### CSS Framework Customization
+
+```php
+// In config/realments.php
+'default_css_framework' => 'bootstrap',
+
+// In controller
+$form->open([
+    'css_framework' => 'tailwind'
+]);
+```
+
+### Theme Mode
+
+```php
+// In config/realments.php
+'default_theme_mode' => 'light',
+
+// In controller
+$form->open([
+    'theme_mode' => 'dark'
+]);
+```
+
+## Documentation
+
+For full documentation, visit our [GitHub Pages](https://incodiy.github.io/realments/).
+
+## Testing
 
 ```bash
-php artisan vendor:publish --tag=realments-config
+composer test
 ```
 
-Konfigurasikan framework CSS di `config/realments.php`:
+## Contributing
 
-```php
-return [
-    'framework' => 'tailwind', // atau 'bootstrap'
-];
-```
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-Ubah default framework CSS:
+## Security
 
-```php
-// config/realments.php
-return [
-    'framework' => 'tailwind',
+If you discover any security related issues, please email info@incodiy.com instead of using the issue tracker.
 
-    'tailwind' => [
-        'label' => 'block text-sm font-medium text-gray-700',
-        'input' => 'mt-1 block w-full rounded-md border-gray-300 shadow-sm',
-        'button' => 'inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded'
-    ],
+## Credits
 
-    'bootstrap' => [
-        'label' => 'form-label',
-        'input' => 'form-control',
-        'button' => 'btn btn-primary'
-    ]
-];
-```
+- [Incodiy](https://github.com/incodiy)
+- [All Contributors](../../contributors)
 
+## License
 
----
-
-## 📁 Struktur Folder View
-
-* `resources/views/vendor/realments/index.blade.php`
-* `resources/views/vendor/realments/scripts.blade.php`
-
----
-
-## ✅ TODO Next Features
-
-* Grouping inputs
-* Conditional rendering (input muncul jika kondisi tertentu)
-* Input repeater + nested repeater
-* Dukungan AJAX autofill untuk select box
-
----
-
-## ❤️ Credits
-
-Dikembangkan oleh [Incodiy Labs](https://github.com/incodiy) untuk kebutuhan form builder modular Laravel + React.
-
----
-
-## 👋 Kontribusi
-
-- OnLoad...
-
----
-
-## 📊 Lisensi
-
-MIT License
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

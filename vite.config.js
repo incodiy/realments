@@ -1,25 +1,25 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  publicDir: false, // Disable publicDir untuk hindari konflik saat outDir ada di dalam public
   build: {
-    outDir: 'public/vendor/realments/js',
-    emptyOutDir: true,
+    lib: {
+      entry: path.resolve(__dirname, 'src/Resources/js/index.js'),
+      name: 'Realments',
+      fileName: (format) => `realments.${format}.js`
+    },
     rollupOptions: {
-      input: path.resolve(__dirname, 'resources/js/realments/index.jsx'),
+      external: ['react', 'react-dom'],
       output: {
-        entryFileNames: 'realments.js',
-        assetFileNames: '[name].[ext]'
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM'
+        }
       }
-    }
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'resources/js/realments'),
-    }
+    },
+    outDir: 'dist',
+    emptyOutDir: true
   }
 });

@@ -1,0 +1,28 @@
+{
+  "name": "incodiy-realments",
+  "version": "1.0.0",
+  "description": "Laravel and React form elements package",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "keywords": [
+    "laravel",
+    "react",
+    "form",
+    "elements"
+  ],
+  "author": "Incodiy",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^4.3.9"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "i18next": "^22.4.15",
+    "react-i18next": "^12.2.2"
+  }
+}
