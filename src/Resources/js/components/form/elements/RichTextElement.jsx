@@ -1,21 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+/**
+ * RichTextElement Component
+ * 
+ * Renders a rich text editor with various editor options (TinyMCE, CKEditor, Quill).
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.element - Element configuration object
+ * @param {string} props.element.name - Field name
+ * @param {string} props.element.label - Label text
+ * @param {boolean} props.element.show_label - Whether to show the label
+ * @param {string} props.element.editor - Editor type (tinymce, ckeditor, quill)
+ * @param {Object} props.element.editor_config - Configuration options for the editor
+ * @param {Object} props.element.attributes - HTML attributes for the textarea
+ * @param {string} props.errorMessage - Error message to display (if any)
+ * @param {string} props.value - Initial value for the editor
+ * @param {string} props.cssFramework - CSS framework to use (bootstrap, tailwind, bulma)
+ * @param {string} props.themeMode - Theme mode (light, dark)
+ * @returns {React.ReactElement} Rich text editor component
+ */
 const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode }) => {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [editorLoaded, setEditorLoaded] = useState(false);
   const editorRef = useRef(null);
+  const containerRef = useRef(null);
   
   // Destructure element properties
   const { 
     name, 
     label, 
     show_label, 
-    editor,
-    editor_config,
+    editor_settings,
     attributes
   } = element;
+  
+  const editorType = editor_settings?.editor || 'tinymce';
+  const editorConfig = editor_settings?.config || {};
+  const editorHeight = editor_settings?.height || 300;
   
   // Initialize input value
   useEffect(() => {
@@ -24,13 +47,29 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
   
   // Load editor
   useEffect(() => {
-    loadEditor();
-  }, []);
+    // Ensure the component is mounted before loading the editor
+    if (containerRef.current) {
+      loadEditor();
+    }
+    
+    // Cleanup function to destroy editor instances
+    return () => {
+      if (editorRef.current) {
+        try {
+          if (editorType === 'tinymce' && window.tinymce) {
+            window.tinymce.remove(`#${attributes.id}`);
+          } else if (editorType === 'ckeditor' && editorRef.current.destroy) {
+            editorRef.current.destroy();
+          }
+        } catch (error) {
+          console.error('Error cleaning up editor:', error);
+        }
+      }
+    };
+  }, [containerRef.current]);
   
   // Load editor based on type
   const loadEditor = async () => {
-    const editorType = editor || 'tinymce';
-    
     try {
       switch (editorType) {
         case 'tinymce':
@@ -56,18 +95,30 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
   const loadTinyMCE = () => {
     return new Promise((resolve, reject) => {
       if (window.tinymce) {
-        resolve();
+        initTinyMCE().then(resolve).catch(reject);
         return;
       }
       
       const script = document.createElement('script');
       script.src = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js';
       script.onload = () => {
+        initTinyMCE().then(resolve).catch(reject);
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  };
+  
+  // Initialize TinyMCE
+  const initTinyMCE = () => {
+    return new Promise((resolve, reject) => {
+      try {
         window.tinymce.init({
           selector: `#${attributes.id}`,
           plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
           toolbar: 'undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen preview save print | insertfile image media template link anchor codesample | ltr rtl',
           menubar: 'file edit view insert format tools table help',
+          height: editorHeight,
           setup: (editor) => {
             editorRef.current = editor;
             editor.on('change', () => {
@@ -76,11 +127,23 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
           },
           skin: themeMode === 'dark' ? 'oxide-dark' : 'oxide',
           content_css: themeMode === 'dark' ? 'dark' : 'default',
-          ...(editor_config || {})
-        }).then(resolve).catch(reject);
-      };
-      script.onerror = reject;
-      document.head.appendChild(script);
+          ...editorConfig
+        }).then(editors => {
+          if (editors && editors.length > 0) {
+            // Set initial content if available
+            if (value) {
+              editors[0].setContent(value);
+            }
+          }
+          resolve();
+        }).catch(error => {
+          console.error('TinyMCE initialization error:', error);
+          reject(error);
+        });
+      } catch (error) {
+        console.error('TinyMCE initialization exception:', error);
+        reject(error);
+      }
     });
   };
   
@@ -88,26 +151,76 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
   const loadCKEditor = () => {
     return new Promise((resolve, reject) => {
       if (window.ClassicEditor) {
-        resolve();
+        initCKEditor().then(resolve).catch(reject);
         return;
       }
       
       const script = document.createElement('script');
       script.src = 'https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js';
       script.onload = () => {
-        window.ClassicEditor.create(document.querySelector(`#${attributes.id}`), {
-          toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo'],
-          ...(editor_config || {})
-        }).then(editor => {
-          editorRef.current = editor;
-          editor.model.document.on('change:data', () => {
-            setInputValue(editor.getData());
-          });
-          resolve();
-        }).catch(reject);
+        setTimeout(() => {
+          initCKEditor().then(resolve).catch(reject);
+        }, 100);
       };
       script.onerror = reject;
       document.head.appendChild(script);
+    });
+  };
+  
+  // Initialize CKEditor
+  const initCKEditor = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const element = document.querySelector(`#${attributes.id}`);
+        if (!element) {
+          reject(new Error(`Element with ID ${attributes.id} not found`));
+          return;
+        }
+        
+        window.ClassicEditor
+          .create(element, {
+            toolbar: {
+              items: [
+                'heading',
+                '|',
+                'bold',
+                'italic',
+                'link',
+                'bulletedList',
+                'numberedList',
+                '|',
+                'outdent',
+                'indent',
+                '|',
+                'blockQuote',
+                'insertTable',
+                'undo',
+                'redo'
+              ]
+            },
+            ...editorConfig
+          })
+          .then(editor => {
+            editorRef.current = editor;
+            editor.model.document.on('change:data', () => {
+              setInputValue(editor.getData());
+            });
+            
+            // Set initial content if available
+            if (value) {
+              editor.setData(value);
+            }
+            
+            resolve(editor);
+          })
+          .catch(error => {
+            console.error('CKEditor initialization error:', error);
+            reject(error);
+          });
+      } catch (error) {
+        console.error('CKEditor initialization exception:', error);
+        reject(error);
+      }
     });
   };
   
@@ -115,7 +228,7 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
   const loadQuill = () => {
     return new Promise((resolve, reject) => {
       if (window.Quill) {
-        resolve();
+        initQuill().then(resolve).catch(reject);
         return;
       }
       
@@ -130,44 +243,62 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
       script.src = 'https://cdn.quilljs.com/1.3.6/quill.min.js';
       script.onload = () => {
         setTimeout(() => {
-          const quill = new window.Quill(`#${attributes.id}_container`, {
-            modules: {
-              toolbar: [
-                ['bold', 'italic', 'underline', 'strike'],
-                ['blockquote', 'code-block'],
-                [{ 'header': 1 }, { 'header': 2 }],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                [{ 'script': 'sub' }, { 'script': 'super' }],
-                [{ 'indent': '-1' }, { 'indent': '+1' }],
-                [{ 'direction': 'rtl' }],
-                [{ 'size': ['small', false, 'large', 'huge'] }],
-                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'font': [] }],
-                [{ 'align': [] }],
-                ['clean'],
-                ['link', 'image', 'video']
-              ]
-            },
-            theme: 'snow',
-            ...(editor_config || {})
-          });
-          
-          editorRef.current = quill;
-          quill.on('text-change', () => {
-            setInputValue(quill.root.innerHTML);
-          });
-          
-          // Set initial content if available
-          if (value) {
-            quill.clipboard.dangerouslyPasteHTML(value);
-          }
-          
-          resolve();
+          initQuill().then(resolve).catch(reject);
         }, 100);
       };
       script.onerror = reject;
       document.head.appendChild(script);
+    });
+  };
+  
+  // Initialize Quill
+  const initQuill = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const container = document.querySelector(`#${attributes.id}_container`);
+        if (!container) {
+          reject(new Error(`Container with ID ${attributes.id}_container not found`));
+          return;
+        }
+        
+        const quill = new window.Quill(container, {
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline', 'strike'],
+              ['blockquote', 'code-block'],
+              [{ 'header': 1 }, { 'header': 2 }],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              [{ 'script': 'sub' }, { 'script': 'super' }],
+              [{ 'indent': '-1' }, { 'indent': '+1' }],
+              [{ 'direction': 'rtl' }],
+              [{ 'size': ['small', false, 'large', 'huge'] }],
+              [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'font': [] }],
+              [{ 'align': [] }],
+              ['clean'],
+              ['link', 'image', 'video']
+            ]
+          },
+          theme: 'snow',
+          ...editorConfig
+        });
+        
+        editorRef.current = quill;
+        quill.on('text-change', () => {
+          setInputValue(quill.root.innerHTML);
+        });
+        
+        // Set initial content if available
+        if (value) {
+          quill.clipboard.dangerouslyPasteHTML(value);
+        }
+        
+        resolve(quill);
+      } catch (error) {
+        console.error('Quill initialization error:', error);
+        reject(error);
+      }
     });
   };
   
@@ -219,8 +350,11 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
   
   const classes = getClasses();
   
+  // Extract React-specific props from attributes
+  const { className, ...otherAttributes } = attributes;
+  
   return (
-    <div className={classes.formGroup}>
+    <div className={classes.formGroup} ref={containerRef}>
       {/* Label */}
       {show_label && (
         <label htmlFor={attributes.id} className={classes.label}>
@@ -230,16 +364,17 @@ const RichTextElement = ({ element, errorMessage, value, cssFramework, themeMode
       
       {/* Editor Container */}
       <div className={classes.editorContainer}>
-        {editor === 'quill' ? (
-          <div id={`${attributes.id}_container`} style={{ height: '300px' }}></div>
+        {editorType === 'quill' ? (
+          <div id={`${attributes.id}_container`} style={{ height: `${editorHeight}px` }}></div>
         ) : null}
         
         <textarea
           id={attributes.id}
           name={name}
-          value={inputValue}
-          className={`${editor !== 'quill' ? 'd-none' : ''}`}
-          {...attributes}
+          defaultValue={inputValue}
+          className={`${className || ''} ${editorType === 'quill' ? 'd-none' : ''}`}
+          style={{ display: editorType !== 'quill' && editorLoaded ? 'none' : '' }}
+          {...otherAttributes}
         ></textarea>
       </div>
       

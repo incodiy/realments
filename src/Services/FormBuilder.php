@@ -167,6 +167,7 @@ class FormBuilder
      * Close a form
      * 
      * Creates the closing form tag and optionally adds a submit button.
+     * The submit button is handled by the FormClose component in React.
      *
      * @param string|null $submitText Text for the submit button, or null to omit button
      * @param array $attributes Additional attributes for the submit button
@@ -174,23 +175,8 @@ class FormBuilder
      */
     public function close($submitText = 'Submit', array $attributes = [])
     {
-        // Add submit button if text is provided
-        if ($submitText !== null) {
-            $submitAttributes = array_merge([
-                'type' => 'submit',
-                'class' => $this->getDefaultButtonClass()
-            ], $attributes);
-            
-            $this->elements[] = [
-                'type' => 'button',
-                'text' => $submitText,
-                'attributes' => $submitAttributes,
-                'css_framework' => $this->cssFramework,
-                'theme_mode' => $this->themeMode
-            ];
-        }
-        
-        // Add form close element
+        // Add form close element with submit button information
+        // The actual button will be rendered by the FormClose component
         $this->elements[] = [
             'type' => 'form_close',
             'submitText' => $submitText,
@@ -476,17 +462,15 @@ class FormBuilder
         $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
         
         // Format options
-        $formattedOptions = [];
+        $radioOptions = [];
         foreach ($options as $key => $value) {
             $optionValue = is_string($key) ? $key : $value;
             $optionLabel = Str::title(str_replace('_', ' ', $value));
-            $optionId = $formattedName . '_' . Str::slug($optionValue, '_') . '_' . Str::random(3);
             
-            $formattedOptions[] = [
-                'id' => $optionId,
+            $radioOptions[] = [
                 'value' => $optionValue,
                 'label' => $optionLabel,
-                'checked' => $optionValue == $checked
+                'checked' => $optionValue === $checked
             ];
         }
         
@@ -494,9 +478,9 @@ class FormBuilder
         $element = [
             'type' => 'radio',
             'name' => $formattedName,
-            'options' => $formattedOptions,
             'label' => $labelText,
             'show_label' => $showLabel,
+            'options' => $radioOptions,
             'attributes' => $attributes,
             'css_framework' => $this->cssFramework,
             'theme_mode' => $this->themeMode
@@ -591,6 +575,730 @@ class FormBuilder
             'name' => $formattedName,
             'label' => $labelText,
             'show_label' => $showLabel,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create an email input element
+     * 
+     * Creates an email input field with email validation.
+     *
+     * @param string $name Element name
+     * @param string $value Default value
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - placeholder: Placeholder text
+     *                          - required: Whether field is required (boolean)
+     * @return $this
+     */
+    public function email($name, $value = null, array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Create element data
+        $element = [
+            'type' => 'email',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a number input element
+     * 
+     * Creates a number input field with numeric validation.
+     *
+     * @param string $name Element name
+     * @param string|int|float $value Default value
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - min: Minimum allowed value
+     *                          - max: Maximum allowed value
+     *                          - step: Step increment value
+     * @return $this
+     */
+    public function number($name, $value = null, array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Create element data
+        $element = [
+            'type' => 'number',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a date input element
+     * 
+     * Creates a date picker input field.
+     *
+     * @param string $name Element name
+     * @param string $value Default value (YYYY-MM-DD format)
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - min: Minimum allowed date (YYYY-MM-DD)
+     *                          - max: Maximum allowed date (YYYY-MM-DD)
+     * @return $this
+     */
+    public function date($name, $value = null, array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Create element data
+        $element = [
+            'type' => 'date',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a time input element
+     * 
+     * Creates a time picker input field.
+     *
+     * @param string $name Element name
+     * @param string $value Default value (HH:MM or HH:MM:SS format)
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - min: Minimum allowed time (HH:MM)
+     *                          - max: Maximum allowed time (HH:MM)
+     *                          - step: Step increment in seconds
+     * @return $this
+     */
+    public function time($name, $value = null, array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Create element data
+        $element = [
+            'type' => 'time',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a datetime input element
+     * 
+     * Creates a datetime picker input field.
+     *
+     * @param string $name Element name
+     * @param string $value Default value (YYYY-MM-DDTHH:MM format)
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - min: Minimum allowed datetime
+     *                          - max: Maximum allowed datetime
+     * @return $this
+     */
+    public function datetime($name, $value = null, array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Create element data
+        $element = [
+            'type' => 'datetime',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a date range input element
+     * 
+     * Creates a date range picker with start and end date inputs.
+     *
+     * @param string $name Element name
+     * @param array $values Default values [start_date, end_date]
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - min: Minimum allowed date
+     *                          - max: Maximum allowed date
+     *                          - separator: Text to display between start and end dates
+     * @return $this
+     */
+    public function dateRange($name, array $values = [], array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Set default values
+        $startDate = $values[0] ?? null;
+        $endDate = $values[1] ?? null;
+        
+        // Create element data
+        $element = [
+            'type' => 'dateRange',
+            'name' => $formattedName,
+            'value' => [
+                'start' => $startDate,
+                'end' => $endDate
+            ],
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'separator' => $attributes['separator'] ?? 'to',
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a file input element
+     * 
+     * Creates a file upload input field.
+     *
+     * @param string $name Element name
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - accept: Accepted file types (e.g., 'image/*', '.pdf')
+     *                          - multiple: Whether multiple files can be selected (boolean)
+     *                          - thumbnail: Whether to show thumbnail preview (boolean)
+     *                          - thumbnail_size: Size of thumbnail in pixels
+     *                          - thumbnail_position: Position of thumbnail (top, left, right, bottom)
+     * @return $this
+     */
+    public function file($name, array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Handle thumbnail settings
+        $thumbnail = [
+            'enabled' => isset($attributes['thumbnail']) && $attributes['thumbnail'] === true,
+            'size' => $attributes['thumbnail_size'] ?? 100,
+            'position' => $attributes['thumbnail_position'] ?? 'top'
+        ];
+        
+        // Create element data
+        $element = [
+            'type' => 'file',
+            'name' => $formattedName,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'thumbnail' => $thumbnail,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a hidden input element
+     * 
+     * Creates a hidden input field.
+     *
+     * @param string $name Element name
+     * @param string $value Field value
+     * @return $this
+     */
+    public function hidden($name, $value = null)
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create element data
+        $element = [
+            'type' => 'hidden',
+            'name' => $formattedName,
+            'value' => $value,
+            'attributes' => [
+                'id' => $formattedName . '_' . Str::random(5)
+            ],
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a range input element
+     * 
+     * Creates a slider input for selecting a value from a range.
+     *
+     * @param string $name Element name
+     * @param string|int|float $value Default value
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - min: Minimum value (default: 0)
+     *                          - max: Maximum value (default: 100)
+     *                          - step: Step increment value (default: 1)
+     *                          - show_value: Whether to display current value (boolean)
+     * @return $this
+     */
+    public function range($name, $value = 50, array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Set default attributes
+        $attributes['min'] = $attributes['min'] ?? 0;
+        $attributes['max'] = $attributes['max'] ?? 100;
+        $attributes['step'] = $attributes['step'] ?? 1;
+        
+        // Check if value display is enabled
+        $showValue = isset($attributes['show_value']) && $attributes['show_value'] === true;
+        
+        // Create element data
+        $element = [
+            'type' => 'range',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'show_value' => $showValue,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a color input element
+     * 
+     * Creates a color picker input field.
+     *
+     * @param string $name Element name
+     * @param string $value Default color value (hex format)
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - show_hex: Whether to display hex value (boolean)
+     * @return $this
+     */
+    public function color($name, $value = '#000000', array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Check if hex value display is enabled
+        $showHex = isset($attributes['show_hex']) && $attributes['show_hex'] === true;
+        
+        // Create element data
+        $element = [
+            'type' => 'color',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'show_hex' => $showHex,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a tags input element
+     * 
+     * Creates an input field for entering multiple tags.
+     *
+     * @param string $name Element name
+     * @param array $values Default tag values
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - placeholder: Placeholder text
+     *                          - suggestions: Array of tag suggestions
+     *                          - max_tags: Maximum number of tags allowed
+     *                          - allow_duplicates: Whether duplicate tags are allowed (boolean)
+     * @return $this
+     */
+    public function tags($name, array $values = [], array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Handle tag settings
+        $tagSettings = [
+            'suggestions' => $attributes['suggestions'] ?? [],
+            'max_tags' => $attributes['max_tags'] ?? null,
+            'allow_duplicates' => isset($attributes['allow_duplicates']) && $attributes['allow_duplicates'] === true
+        ];
+        
+        // Create element data
+        $element = [
+            'type' => 'tags',
+            'name' => $formattedName,
+            'value' => $values,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'tag_settings' => $tagSettings,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a rich text editor element
+     * 
+     * Creates a rich text editor for advanced content editing.
+     *
+     * @param string $name Element name
+     * @param string $value Default HTML content
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - editor: Editor type (tinymce, ckeditor, quill)
+     *                          - editor_config: Configuration options for the editor
+     *                          - height: Editor height in pixels
+     * @return $this
+     */
+    public function richText($name, $value = '', array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Editor settings
+        $editorSettings = [
+            'editor' => $attributes['editor'] ?? 'tinymce', // Options: tinymce, ckeditor, quill
+            'config' => $attributes['editor_config'] ?? [],
+            'height' => $attributes['height'] ?? 300
+        ];
+        
+        // Create element data
+        $element = [
+            'type' => 'richText',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'editor_settings' => $editorSettings,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create a captcha element
+     * 
+     * Creates a CAPTCHA verification element.
+     *
+     * @param string $name Element name
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - captcha_type: Type of CAPTCHA (image, math, recaptcha)
+     *                          - site_key: Site key for reCAPTCHA
+     * @return $this
+     */
+    public function captcha($name = 'captcha', array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // CAPTCHA settings
+        $captchaSettings = [
+            'captcha_type' => $attributes['captcha_type'] ?? 'image', // Options: image, math, recaptcha
+            'site_key' => $attributes['site_key'] ?? config('realments.recaptcha_site_key', '')
+        ];
+        
+        // Create element data
+        $element = [
+            'type' => 'captcha',
+            'name' => $formattedName,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'captcha_settings' => $captchaSettings,
+            'attributes' => $attributes,
+            'css_framework' => $this->cssFramework,
+            'theme_mode' => $this->themeMode
+        ];
+        
+        $this->elements[] = $element;
+        $this->currentElement = $element;
+        
+        return $this;
+    }
+    
+    /**
+     * Create an autocomplete input element
+     * 
+     * Creates an input field with autocomplete suggestions.
+     *
+     * @param string $name Element name
+     * @param string $value Default value
+     * @param array $suggestions Array of autocomplete suggestions
+     * @param array $attributes Additional attributes and settings
+     *                          - id: Element ID (optional, auto-generated if not provided)
+     *                          - label: Custom label text or false to hide label
+     *                          - placeholder: Placeholder text
+     *                          - min_chars: Minimum characters before showing suggestions
+     *                          - max_suggestions: Maximum number of suggestions to show
+     * @return $this
+     */
+    public function autocomplete($name, $value = null, array $suggestions = [], array $attributes = [])
+    {
+        // Format name for HTML attributes (lowercase, replace spaces with dashes)
+        $formattedName = Str::slug($name, '-');
+        
+        // Create label text with first letter of each word capitalized
+        $labelText = Str::title($name);
+        
+        // Set ID if not provided
+        if (!isset($attributes['id'])) {
+            $attributes['id'] = $formattedName . '_' . Str::random(5);
+        }
+        
+        // Check if label should be displayed
+        $showLabel = !isset($attributes['label']) || $attributes['label'] !== false;
+        
+        // Autocomplete settings
+        $autocompleteSettings = [
+            'suggestions' => $suggestions,
+            'min_chars' => $attributes['min_chars'] ?? 2,
+            'max_suggestions' => $attributes['max_suggestions'] ?? 10
+        ];
+        
+        // Create element data
+        $element = [
+            'type' => 'autocomplete',
+            'name' => $formattedName,
+            'value' => $value,
+            'label' => $labelText,
+            'show_label' => $showLabel,
+            'autocomplete_settings' => $autocompleteSettings,
             'attributes' => $attributes,
             'css_framework' => $this->cssFramework,
             'theme_mode' => $this->themeMode

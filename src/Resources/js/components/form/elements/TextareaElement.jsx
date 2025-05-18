@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+/**
+ * TextareaElement Component
+ * 
+ * Renders a textarea input element with optional WYSIWYG editor integration.
+ * Supports TinyMCE, CKEditor, and Quill editors.
+ * 
+ * @param {Object} element - Element configuration object
+ * @param {string} errorMessage - Error message to display if validation fails
+ * @param {string} value - Default value for the textarea
+ * @param {string} cssFramework - CSS framework to use for styling (bootstrap, tailwind, bulma)
+ * @param {string} themeMode - Theme mode (light, dark)
+ */
 const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode }) => {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [editorLoaded, setEditorLoaded] = useState(false);
+  const [editorInstance, setEditorInstance] = useState(null);
   
   // Destructure element properties
   const { 
@@ -25,6 +38,15 @@ const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode
     if (wysiwyg && wysiwyg.enabled) {
       loadEditor();
     }
+    
+    // Cleanup function to destroy editor instances
+    return () => {
+      if (editorInstance) {
+        if (wysiwyg && wysiwyg.editor === 'tinymce' && window.tinymce) {
+          window.tinymce.remove(`#${attributes.id}`);
+        }
+      }
+    };
   }, [wysiwyg]);
   
   // Handle input change
@@ -61,28 +83,36 @@ const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode
   const loadTinyMCE = () => {
     return new Promise((resolve, reject) => {
       if (window.tinymce) {
-        resolve();
+        initTinyMCE().then(resolve).catch(reject);
         return;
       }
       
       const script = document.createElement('script');
       script.src = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js';
       script.onload = () => {
-        window.tinymce.init({
-          selector: `#${attributes.id}`,
-          plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
-          toolbar: 'undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen preview save print | insertfile image media template link anchor codesample | ltr rtl',
-          menubar: 'file edit view insert format tools table help',
-          setup: (editor) => {
-            editor.on('change', () => {
-              setInputValue(editor.getContent());
-            });
-          },
-          ...(wysiwyg.config || {})
-        }).then(resolve).catch(reject);
+        initTinyMCE().then(resolve).catch(reject);
       };
       script.onerror = reject;
       document.head.appendChild(script);
+    });
+  };
+  
+  // Initialize TinyMCE
+  const initTinyMCE = () => {
+    return new Promise((resolve, reject) => {
+      window.tinymce.init({
+        selector: `#${attributes.id}`,
+        plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
+        toolbar: 'undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen preview save print | insertfile image media template link anchor codesample | ltr rtl',
+        menubar: 'file edit view insert format tools table help',
+        setup: (editor) => {
+          editor.on('change', () => {
+            setInputValue(editor.getContent());
+          });
+          setEditorInstance(editor);
+        },
+        ...(wysiwyg.config || {})
+      }).then(resolve).catch(reject);
     });
   };
   
@@ -90,25 +120,70 @@ const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode
   const loadCKEditor = () => {
     return new Promise((resolve, reject) => {
       if (window.ClassicEditor) {
-        resolve();
+        initCKEditor().then(resolve).catch(reject);
         return;
       }
       
       const script = document.createElement('script');
       script.src = 'https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js';
       script.onload = () => {
-        window.ClassicEditor.create(document.querySelector(`#${attributes.id}`), {
-          toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'imageUpload', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo'],
-          ...(wysiwyg.config || {})
-        }).then(editor => {
-          editor.model.document.on('change:data', () => {
-            setInputValue(editor.getData());
-          });
-          resolve();
-        }).catch(reject);
+        setTimeout(() => {
+          initCKEditor().then(resolve).catch(reject);
+        }, 100);
       };
       script.onerror = reject;
       document.head.appendChild(script);
+    });
+  };
+  
+  // Initialize CKEditor
+  const initCKEditor = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const element = document.querySelector(`#${attributes.id}`);
+        if (!element) {
+          reject(new Error(`Element with ID ${attributes.id} not found`));
+          return;
+        }
+        
+        window.ClassicEditor
+          .create(element, {
+            toolbar: {
+              items: [
+                'heading',
+                '|',
+                'bold',
+                'italic',
+                'link',
+                'bulletedList',
+                'numberedList',
+                '|',
+                'outdent',
+                'indent',
+                '|',
+                'blockQuote',
+                'insertTable',
+                'undo',
+                'redo'
+              ]
+            },
+            ...(wysiwyg.config || {})
+          })
+          .then(editor => {
+            editor.model.document.on('change:data', () => {
+              setInputValue(editor.getData());
+            });
+            setEditorInstance(editor);
+            resolve(editor);
+          })
+          .catch(error => {
+            console.error('CKEditor initialization error:', error);
+            reject(error);
+          });
+      } catch (error) {
+        console.error('CKEditor initialization exception:', error);
+        reject(error);
+      }
     });
   };
   
@@ -116,7 +191,7 @@ const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode
   const loadQuill = () => {
     return new Promise((resolve, reject) => {
       if (window.Quill) {
-        resolve();
+        initQuill().then(resolve).catch(reject);
         return;
       }
       
@@ -131,38 +206,57 @@ const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode
       script.src = 'https://cdn.quilljs.com/1.3.6/quill.min.js';
       script.onload = () => {
         setTimeout(() => {
-          const quill = new window.Quill(`#${attributes.id}_container`, {
-            modules: {
-              toolbar: [
-                ['bold', 'italic', 'underline', 'strike'],
-                ['blockquote', 'code-block'],
-                [{ 'header': 1 }, { 'header': 2 }],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                [{ 'script': 'sub' }, { 'script': 'super' }],
-                [{ 'indent': '-1' }, { 'indent': '+1' }],
-                [{ 'direction': 'rtl' }],
-                [{ 'size': ['small', false, 'large', 'huge'] }],
-                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'font': [] }],
-                [{ 'align': [] }],
-                ['clean'],
-                ['link', 'image', 'video']
-              ]
-            },
-            theme: 'snow',
-            ...(wysiwyg.config || {})
-          });
-          
-          quill.on('text-change', () => {
-            setInputValue(quill.root.innerHTML);
-          });
-          
-          resolve();
+          initQuill().then(resolve).catch(reject);
         }, 100);
       };
       script.onerror = reject;
       document.head.appendChild(script);
+    });
+  };
+  
+  // Initialize Quill
+  const initQuill = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const container = document.querySelector(`#${attributes.id}_container`);
+        if (!container) {
+          reject(new Error(`Container with ID ${attributes.id}_container not found`));
+          return;
+        }
+        
+        const quill = new window.Quill(container, {
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline', 'strike'],
+              ['blockquote', 'code-block'],
+              [{ 'header': 1 }, { 'header': 2 }],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              [{ 'script': 'sub' }, { 'script': 'super' }],
+              [{ 'indent': '-1' }, { 'indent': '+1' }],
+              [{ 'direction': 'rtl' }],
+              [{ 'size': ['small', false, 'large', 'huge'] }],
+              [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'font': [] }],
+              [{ 'align': [] }],
+              ['clean'],
+              ['link', 'image', 'video']
+            ]
+          },
+          theme: 'snow',
+          ...(wysiwyg.config || {})
+        });
+        
+        quill.on('text-change', () => {
+          setInputValue(quill.root.innerHTML);
+        });
+        
+        setEditorInstance(quill);
+        resolve(quill);
+      } catch (error) {
+        console.error('Quill initialization error:', error);
+        reject(error);
+      }
     });
   };
   
@@ -234,16 +328,16 @@ const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode
       {/* WYSIWYG editor or regular textarea */}
       {wysiwyg && wysiwyg.enabled ? (
         <>
-          {wysiwyg.editor === 'quill' ? (
-            <div id={`${attributes.id}_container`} style={{ height: '200px' }}></div>
-          ) : null}
+          {wysiwyg.editor === 'quill' && (
+            <div id={`${attributes.id}_container`} style={{ height: '200px', marginBottom: '10px' }}></div>
+          )}
           <textarea
             id={attributes.id}
             name={name}
-            value={inputValue}
+            defaultValue={inputValue}
             onChange={handleChange}
-            className={`${classes.textarea} ${attributes.class || ''} ${wysiwyg.editor === 'quill' ? 'd-none' : ''}`}
-            {...attributes}
+            className={`${classes.textarea} ${attributes.className || ''} ${wysiwyg.editor === 'quill' ? 'd-none' : ''}`}
+            rows={attributes.rows || 5}
           ></textarea>
         </>
       ) : (
@@ -252,8 +346,8 @@ const TextareaElement = ({ element, errorMessage, value, cssFramework, themeMode
           name={name}
           value={inputValue}
           onChange={handleChange}
-          className={`${classes.textarea} ${attributes.class || ''}`}
-          {...attributes}
+          className={`${classes.textarea} ${attributes.className || ''}`}
+          rows={attributes.rows || 5}
         ></textarea>
       )}
       

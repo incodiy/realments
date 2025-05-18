@@ -1,8 +1,8 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 // Components
 const App = () => {
@@ -19,7 +19,7 @@ const App = () => {
   }, [darkMode]);
 
   return (
-    <Router>
+    <Router basename="/incodiy-realments">
       <div className="app-container">
         <Header darkMode={darkMode} setDarkMode={setDarkMode} />
         <main>
@@ -420,7 +420,17 @@ const Installation = ({ darkMode }) => {
       
       <div className="card mb-4">
         <div className="card-body">
-          <h2 className="h4 mb-3">2. Publish Assets</h2>
+          <h2 className="h4 mb-3">2. Install NPM Dependencies</h2>
+          <SyntaxHighlighter language="bash" style={codeStyle}>
+            npm install
+          </SyntaxHighlighter>
+          <p className="mt-3">This will install all the required frontend dependencies including React.</p>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">3. Publish Assets</h2>
           <SyntaxHighlighter language="bash" style={codeStyle}>
             php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-assets"
           </SyntaxHighlighter>
@@ -429,7 +439,7 @@ const Installation = ({ darkMode }) => {
       
       <div className="card mb-4">
         <div className="card-body">
-          <h2 className="h4 mb-3">3. Publish Configuration (Optional)</h2>
+          <h2 className="h4 mb-3">4. Publish Configuration (Optional)</h2>
           <SyntaxHighlighter language="bash" style={codeStyle}>
             php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-config"
           </SyntaxHighlighter>
@@ -438,7 +448,7 @@ const Installation = ({ darkMode }) => {
       
       <div className="card mb-4">
         <div className="card-body">
-          <h2 className="h4 mb-3">4. Publish Language Files (Optional)</h2>
+          <h2 className="h4 mb-3">5. Publish Language Files (Optional)</h2>
           <SyntaxHighlighter language="bash" style={codeStyle}>
             php artisan vendor:publish --provider="Incodiy\Realments\Providers\RealmentsServiceProvider" --tag="realments-lang"
           </SyntaxHighlighter>
@@ -447,25 +457,12 @@ const Installation = ({ darkMode }) => {
       
       <div className="card mb-4">
         <div className="card-body">
-          <h2 className="h4 mb-3">5. Add Facade to config/app.php (Laravel 10 only)</h2>
+          <h2 className="h4 mb-3">6. Add Facade to config/app.php (Laravel 10 only)</h2>
           <SyntaxHighlighter language="php" style={codeStyle}>
 {`'aliases' => [
-    // ...
+    // Other aliases
     'Realments' => Incodiy\\Realments\\Facades\\Realments::class,
 ],`}
-          </SyntaxHighlighter>
-        </div>
-      </div>
-      
-      <div className="card mb-4">
-        <div className="card-body">
-          <h2 className="h4 mb-3">6. Install NPM Dependencies</h2>
-          <SyntaxHighlighter language="bash" style={codeStyle}>
-            npm install
-          </SyntaxHighlighter>
-          <p className="mt-3">Or if you're using Yarn:</p>
-          <SyntaxHighlighter language="bash" style={codeStyle}>
-            yarn install
           </SyntaxHighlighter>
         </div>
       </div>
@@ -476,50 +473,28 @@ const Installation = ({ darkMode }) => {
           <SyntaxHighlighter language="bash" style={codeStyle}>
             npm run build
           </SyntaxHighlighter>
-          <p className="mt-3">Or if you're using Yarn:</p>
-          <SyntaxHighlighter language="bash" style={codeStyle}>
-            yarn build
-          </SyntaxHighlighter>
+          <p className="mt-3">This will compile all the React components and other assets.</p>
         </div>
       </div>
       
       <div className="card mb-4">
         <div className="card-body">
-          <h2 className="h4 mb-3">8. Include Partials in Your Layout</h2>
-          <p>In your blade layout file, include the Realments partials:</p>
+          <h2 className="h4 mb-3">8. Include Assets in Your Layout</h2>
+          <p>Add the following to your layout file:</p>
           <SyntaxHighlighter language="html" style={codeStyle}>
-{`<!DOCTYPE html>
-<html lang="en">
+{`<!-- In your blade layout file -->
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your App</title>
-    
-    <!-- Include Realments head partial -->
+    <!-- Other head elements -->
     <x-realments-head />
-    
-    <!-- Your other head content -->
 </head>
 <body>
     <!-- Your content -->
     
-    <!-- Include Realments scripts partial -->
+    <!-- Before closing body tag -->
     <x-realments-scripts />
-    
-    <!-- Your other scripts -->
-</body>
-</html>`}
+</body>`}
           </SyntaxHighlighter>
         </div>
-      </div>
-      
-      <div className="alert alert-info">
-        <h4 className="alert-heading">Laravel Version Compatibility</h4>
-        <p>Realments supports Laravel versions 10.x, 11.x, and 12.x. The installation process is slightly different for each version:</p>
-        <ul>
-          <li><strong>Laravel 10.x:</strong> You need to manually add the Facade to <code>config/app.php</code></li>
-          <li><strong>Laravel 11.x and 12.x:</strong> The package is automatically discovered, no need to add the Facade manually</li>
-        </ul>
       </div>
     </div>
   );
@@ -537,36 +512,73 @@ const Usage = ({ darkMode }) => {
           <h2 className="h4 mb-3">Basic Usage</h2>
           <p>Here's a basic example of how to use Realments in your Laravel controller:</p>
           <SyntaxHighlighter language="php" style={codeStyle}>
-{`// In your controller
-public function create()
+{`<?php
+
+namespace App\\Http\\Controllers;
+
+use Illuminate\\Http\\Request;
+
+class UserController extends Controller
 {
-    $form = app('realments');
+    public function create()
+    {
+        $form = app('realments');
+        
+        // Open form
+        $form->open([
+            'action' => route('users.store'),
+            'method' => 'POST',
+            'files' => true,
+            'css_framework' => 'bootstrap', // Options: bootstrap, tailwind, bulma
+            'theme_mode' => 'light' // Options: light, dark
+        ]);
+        
+        // Add form elements
+        $form->text('name', null, [
+            'placeholder' => 'Enter your name',
+            'required' => true
+        ])->rules('required|max:255');
+        
+        $form->email('email', null, [
+            'placeholder' => 'Enter your email'
+        ])->rules('required|email|unique:users');
+        
+        $form->password('password', [
+            'placeholder' => 'Enter your password'
+        ])->rules('required|min:8');
+        
+        $form->select('country', [
+            'Select a country',
+            'usa' => 'United States',
+            'canada' => 'Canada',
+            'uk' => 'United Kingdom'
+        ]);
+        
+        // Close form with submit button
+        $form->close('Register');
+        
+        // Render the form
+        return view('users.create', [
+            'form' => $form->render()
+        ]);
+    }
     
-    // Open form
-    $form->open([
-        'action' => route('users.store'),
-        'method' => 'POST',
-        'files' => true, // If you need file uploads
-        'css_framework' => 'bootstrap', // Options: bootstrap, tailwind, bulma
-        'theme_mode' => 'light' // Options: light, dark
-    ]);
-    
-    // Add form elements
-    $form->text('name', 'John Doe', [
-        'placeholder' => 'Enter your name',
-        'required' => true
-    ])->rules('required|max:255');
-    
-    $form->email('email', 'john@example.com')
-        ->rules('required|email');
-    
-    // Close form with submit button
-    $form->close('Submit');
-    
-    // Render the form
-    return view('users.create', [
-        'form' => $form->render()
-    ]);
+    public function store(Request \$request)
+    {
+        // Validate the request
+        \$validated = \$request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8',
+            'country' => 'required'
+        ]);
+        
+        // Create the user
+        // ...
+        
+        return redirect()->route('users.index')
+            ->with('success', 'User created successfully.');
+    }
 }`}
           </SyntaxHighlighter>
         </div>
@@ -575,9 +587,9 @@ public function create()
       <div className="card mb-4">
         <div className="card-body">
           <h2 className="h4 mb-3">In Your Blade View</h2>
-          <p>In your blade view, simply output the form variable:</p>
+          <p>In your blade view, simply echo the form variable:</p>
           <SyntaxHighlighter language="html" style={codeStyle}>
-{`<!-- users/create.blade.php -->
+{`<!-- resources/views/users/create.blade.php -->
 @extends('layouts.app')
 
 @section('content')
@@ -593,118 +605,41 @@ public function create()
       
       <div className="card mb-4">
         <div className="card-body">
-          <h2 className="h4 mb-3">Form Elements</h2>
-          <p>Realments provides a wide range of form elements. Here are some examples:</p>
-          
-          <h5 className="mt-4">Text Input</h5>
+          <h2 className="h4 mb-3">Using the Facade</h2>
+          <p>You can also use the Realments facade:</p>
           <SyntaxHighlighter language="php" style={codeStyle}>
-{`// Basic text input
-$form->text('name', 'John Doe');
+{`<?php
 
-// With attributes
-$form->text('name', 'John Doe', [
-    'placeholder' => 'Enter your name',
-    'class' => 'custom-class',
-    'required' => true
-]);
+namespace App\\Http\\Controllers;
 
-// With validation rules
-$form->text('email', 'john@example.com')
-    ->rules('required|email');`}
-          </SyntaxHighlighter>
-          
-          <h5 className="mt-4">Select Box</h5>
-          <SyntaxHighlighter language="php" style={codeStyle}>
-{`// Basic select
-$form->select('country', [
-    'Select a country', // First option is empty by default
-    'usa' => 'United States',
-    'canada' => 'Canada',
-    'uk' => 'United Kingdom'
-]);
+use Illuminate\\Http\\Request;
+use Realments;
 
-// With selected value
-$form->select('country', [
-    'Select a country',
-    'usa' => 'United States',
-    'canada' => 'Canada',
-    'uk' => 'United Kingdom'
-], [
-    'selected' => 'usa'
-]);
-
-// Multi-select
-$form->select('countries', [
-    'Select countries',
-    'usa' => 'United States',
-    'canada' => 'Canada',
-    'uk' => 'United Kingdom'
-], [
-    'multiselect' => true,
-    'selected' => ['usa', 'uk']
-]);`}
-          </SyntaxHighlighter>
-          
-          <h5 className="mt-4">Checkbox and Radio</h5>
-          <SyntaxHighlighter language="php" style={codeStyle}>
-{`// Checkbox
-$form->checkbox('agree_terms', '1', true, [
-    'label' => 'I agree to the terms and conditions'
-]);
-
-// Radio buttons
-$form->radio('gender', [
-    'male' => 'Male',
-    'female' => 'Female',
-    'other' => 'Other'
-], 'male');`}
-          </SyntaxHighlighter>
-          
-          <h5 className="mt-4">Date and Time</h5>
-          <SyntaxHighlighter language="php" style={codeStyle}>
-{`// Date input
-$form->date('birth_date', '1990-01-01');
-
-// Time input
-$form->time('meeting_time', '14:30');
-
-// DateTime input
-$form->datetime('appointment', '2023-05-15T14:30');
-
-// Date range
-$form->dateRange('vacation', ['2023-06-01', '2023-06-15']);`}
-          </SyntaxHighlighter>
-        </div>
-      </div>
-      
-      <div className="card mb-4">
-        <div className="card-body">
-          <h2 className="h4 mb-3">Handling Form Submission</h2>
-          <p>In your controller's store method, you can use Laravel's validation system:</p>
-          <SyntaxHighlighter language="php" style={codeStyle}>
-{`public function store(Request $request)
+class UserController extends Controller
 {
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users',
-        'country' => 'required',
-        'agree_terms' => 'required',
-    ]);
-    
-    // Create user or perform other actions
-    User::create($validated);
-    
-    return redirect()->route('users.index')
-        ->with('success', 'User created successfully!');
+    public function create()
+    {
+        // Open form
+        Realments::open([
+            'action' => route('users.store'),
+            'method' => 'POST'
+        ]);
+        
+        // Add form elements
+        Realments::text('name');
+        Realments::email('email');
+        
+        // Close form
+        Realments::close('Submit');
+        
+        // Render the form
+        return view('users.create', [
+            'form' => Realments::render()
+        ]);
+    }
 }`}
           </SyntaxHighlighter>
-          <p>If validation fails, Laravel will automatically redirect back with errors, and Realments will display them next to the corresponding form elements.</p>
         </div>
-      </div>
-      
-      <div className="alert alert-info">
-        <h4 className="alert-heading">Advanced Usage</h4>
-        <p>Check out the <Link to="/components">Components</Link> and <Link to="/api">API</Link> sections for more detailed information on all available form elements and their options.</p>
       </div>
     </div>
   );
@@ -712,153 +647,231 @@ $form->dateRange('vacation', ['2023-06-01', '2023-06-15']);`}
 
 const Components = ({ darkMode }) => {
   const codeStyle = darkMode ? vscDarkPlus : vs;
-  const [activeComponent, setActiveComponent] = React.useState('text');
-  
-  const components = [
-    { id: 'text', name: 'Text Input' },
-    { id: 'textarea', name: 'Textarea' },
-    { id: 'select', name: 'Select' },
-    { id: 'checkbox', name: 'Checkbox' },
-    { id: 'radio', name: 'Radio' },
-    { id: 'switch', name: 'Switch' },
-    { id: 'password', name: 'Password' },
-    { id: 'email', name: 'Email' },
-    { id: 'number', name: 'Number' },
-    { id: 'date', name: 'Date' },
-    { id: 'time', name: 'Time' },
-    { id: 'datetime', name: 'DateTime' },
-    { id: 'daterange', name: 'Date Range' },
-    { id: 'file', name: 'File Upload' },
-    { id: 'hidden', name: 'Hidden' },
-    { id: 'range', name: 'Range' },
-    { id: 'color', name: 'Color' },
-    { id: 'tags', name: 'Tags' },
-    { id: 'richtext', name: 'Rich Text' },
-    { id: 'captcha', name: 'Captcha' },
-    { id: 'autocomplete', name: 'Autocomplete' }
-  ];
-  
-  const componentExamples = {
-    text: {
-      title: 'Text Input',
-      description: 'A standard text input field for single-line text entry.',
-      code: `$form->text('name', 'John Doe', [
-    'placeholder' => 'Enter your name',
-    'required' => true
-])->rules('required|max:255');`
-    },
-    textarea: {
-      title: 'Textarea',
-      description: 'A multi-line text input area, optionally with WYSIWYG editor.',
-      code: `// Basic textarea
-$form->textarea('description', 'Lorem ipsum dolor sit amet', [
-    'rows' => 5
-]);
-
-// With WYSIWYG editor
-$form->textarea('content', '<p>Hello World</p>', [
-    'wysiwyg' => true,
-    'editor' => 'tinymce', // Options: tinymce, ckeditor, quill
-    'editor_config' => [
-        'height' => 300,
-        'plugins' => 'link image code'
-    ]
-]);`
-    },
-    select: {
-      title: 'Select',
-      description: 'A dropdown select element with options, supporting single and multiple selection.',
-      code: `// Basic select
-$form->select('country', [
-    'Select a country', // First option is empty by default
-    'usa' => 'United States',
-    'canada' => 'Canada',
-    'uk' => 'United Kingdom'
-]);
-
-// With selected value
-$form->select('country', [
-    'Select a country',
-    'usa' => 'United States',
-    'canada' => 'Canada',
-    'uk' => 'United Kingdom'
-], [
-    'selected' => 'usa'
-]);
-
-// Multi-select
-$form->select('countries', [
-    'Select countries',
-    'usa' => 'United States',
-    'canada' => 'Canada',
-    'uk' => 'United Kingdom'
-], [
-    'multiselect' => true,
-    'selected' => ['usa', 'uk']
-]);
-
-// With add button
-$form->select('skills', [
-    'Select a skill',
-    'php' => 'PHP',
-    'js' => 'JavaScript',
-    'python' => 'Python'
-], [
-    'add_button' => true,
-    'max_additions' => 5,
-    'button_position' => 'right', // Options: right, bottom
-    'button_text' => 'Add Skill',
-    'button_class' => 'btn btn-sm btn-secondary',
-    'added_items' => [
-        ['php'], // First item with PHP selected
-        ['js']   // Second item with JavaScript selected
-    ]
-]);`
-    },
-    // Add more component examples here...
-  };
   
   return (
     <div className="container py-5">
-      <h1 className="mb-4">Components</h1>
+      <h1 className="mb-4">Form Components</h1>
       
-      <div className="row">
-        <div className="col-md-3">
-          <div className="list-group components-nav sticky-top">
-            {components.map(component => (
-              <button
-                key={component.id}
-                className={`list-group-item list-group-item-action ${activeComponent === component.id ? 'active' : ''}`}
-                onClick={() => setActiveComponent(component.id)}
-              >
-                {component.name}
-              </button>
-            ))}
-          </div>
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Text Input</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Basic text input
+$form->text('name', 'John Doe', [
+    'placeholder' => 'Enter your name',
+    'required' => true
+]);
+
+// With validation rules
+$form->text('username')->rules('required|alpha_dash|min:3|max:20');`}
+          </SyntaxHighlighter>
         </div>
-        
-        <div className="col-md-9">
-          {componentExamples[activeComponent] ? (
-            <div className="component-section">
-              <h2>{componentExamples[activeComponent].title}</h2>
-              <p>{componentExamples[activeComponent].description}</p>
-              
-              <div className="card mb-4">
-                <div className="card-header">Example</div>
-                <div className="card-body">
-                  <SyntaxHighlighter language="php" style={codeStyle}>
-                    {componentExamples[activeComponent].code}
-                  </SyntaxHighlighter>
-                </div>
-              </div>
-              
-              {/* Add more details, options, etc. for each component */}
-            </div>
-          ) : (
-            <div className="alert alert-info">
-              Component documentation is being developed. Please check back soon.
-            </div>
-          )}
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Textarea</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Basic textarea
+$form->textarea('description', 'Default text', [
+    'rows' => 5,
+    'placeholder' => 'Enter description'
+]);
+
+// With WYSIWYG editor
+$form->textarea('content', null, [
+    'wysiwyg' => true,
+    'editor' => 'ckeditor', // Options: tinymce, ckeditor, quill
+    'rows' => 10
+]);`}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Select Dropdown</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Basic select
+$form->select('country', [
+    'Select a country', // First option is placeholder
+    'usa' => 'United States',
+    'canada' => 'Canada',
+    'uk' => 'United Kingdom'
+]);
+
+// Multi-select
+$form->select('skills', [
+    'php' => 'PHP',
+    'js' => 'JavaScript',
+    'python' => 'Python',
+    'ruby' => 'Ruby'
+], [
+    'multiselect' => true,
+    'selected' => ['php', 'js'] // Pre-selected values
+]);`}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Checkbox</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Single checkbox
+$form->checkbox('remember_me', '1', true, [
+    'label' => 'Remember me'
+]);
+
+// Custom label
+$form->checkbox('terms', 'accepted', false, [
+    'label' => 'I agree to the <a href="/terms">Terms and Conditions</a>'
+]);`}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Radio Buttons</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Radio buttons
+$form->radio('gender', [
+    'male' => 'Male',
+    'female' => 'Female',
+    'other' => 'Other'
+], 'male'); // Default selected value`}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Switch</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Switch toggle
+$form->switch('notifications', '1', true, [
+    'label' => 'Enable notifications'
+]);`}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Date & Time Inputs</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Date input
+$form->date('birth_date', '1990-01-01', [
+    'min' => '1900-01-01',
+    'max' => date('Y-m-d')
+]);
+
+// Time input
+$form->time('appointment_time', '14:30', [
+    'min' => '09:00',
+    'max' => '18:00'
+]);
+
+// Date and time input
+$form->datetime('event_datetime', '2023-12-31T23:59', [
+    'min' => '2023-01-01T00:00',
+    'max' => '2024-12-31T23:59'
+]);
+
+// Date range
+$form->dateRange('vacation_period', ['2023-07-01', '2023-07-15'], [
+    'separator' => 'to'
+]);`}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">File Upload</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Basic file upload
+$form->file('document', [
+    'accept' => '.pdf,.doc,.docx'
+]);
+
+// Image upload with thumbnail preview
+$form->file('profile_picture', [
+    'accept' => 'image/*',
+    'thumbnail' => true,
+    'thumbnail_size' => 150,
+    'thumbnail_position' => 'top' // Options: top, right, bottom, left
+]);
+
+// Multiple file upload
+$form->file('gallery', [
+    'multiple' => true,
+    'accept' => 'image/*',
+    'thumbnail' => true
+]);`}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Other Input Types</h2>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// Email input
+$form->email('email', 'user@example.com');
+
+// Password input
+$form->password('password');
+
+// Number input
+$form->number('quantity', 1, [
+    'min' => 1,
+    'max' => 100,
+    'step' => 1
+]);
+
+// Hidden input
+$form->hidden('user_id', 123);
+
+// Range slider
+$form->range('rating', 50, [
+    'min' => 0,
+    'max' => 100,
+    'step' => 5,
+    'show_value' => true
+]);
+
+// Color picker
+$form->color('theme_color', '#3490dc', [
+    'show_hex' => true
+]);
+
+// Tags input
+$form->tags('keywords', ['laravel', 'php'], [
+    'suggestions' => ['laravel', 'php', 'react', 'javascript', 'css', 'html'],
+    'max_tags' => 10
+]);
+
+// Rich text editor
+$form->richText('article_content', '<p>Default content</p>', [
+    'editor' => 'tinymce', // Options: tinymce, ckeditor, quill
+    'height' => 400
+]);
+
+// Captcha
+$form->captcha('verification', [
+    'captcha_type' => 'image' // Options: image, math, recaptcha
+]);
+
+// Autocomplete
+$form->autocomplete('city', null, [
+    'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'
+], [
+    'min_chars' => 2,
+    'max_suggestions' => 5
+]);`}
+          </SyntaxHighlighter>
         </div>
       </div>
     </div>
@@ -874,128 +887,156 @@ const API = ({ darkMode }) => {
       
       <div className="card mb-4">
         <div className="card-body">
-          <h2 className="h4 mb-3">Form Builder</h2>
-          <p>The main class for building forms is <code>FormBuilder</code>. You can access it through the service container or the Facade:</p>
+          <h2 className="h4 mb-3">Form Methods</h2>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>open(array $attributes = [])</code></td>
+                <td>Opens a new form with the specified attributes.</td>
+              </tr>
+              <tr>
+                <td><code>close(string $submitText = 'Submit', array $attributes = [])</code></td>
+                <td>Closes the form and optionally adds a submit button.</td>
+              </tr>
+              <tr>
+                <td><code>render()</code></td>
+                <td>Renders the form and returns the HTML.</td>
+              </tr>
+              <tr>
+                <td><code>rules(string|array $rules, array $messages = [])</code></td>
+                <td>Sets validation rules for the most recently added element.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Form Open Attributes</h2>
           <SyntaxHighlighter language="php" style={codeStyle}>
-{`// Using service container
-$form = app('realments');
-
-// Using Facade (Laravel 10 only)
-use Incodiy\\Realments\\Facades\\Realments;
-$form = Realments::make();`}
+{`$form->open([
+    'id' => 'my-form', // Form ID (optional, auto-generated if not provided)
+    'method' => 'POST', // HTTP method (GET, POST, PUT, DELETE)
+    'action' => route('users.store'), // Form submission URL
+    'enctype' => 'multipart/form-data', // Form encoding type
+    'files' => true, // Whether form includes file uploads (boolean)
+    'css_framework' => 'bootstrap', // CSS framework to use (bootstrap, tailwind, bulma)
+    'theme_mode' => 'light', // Theme mode (light, dark)
+    'class' => 'my-custom-form-class' // Additional CSS classes
+]);`}
           </SyntaxHighlighter>
         </div>
       </div>
       
-      <div className="accordion" id="apiAccordion">
-        <div className="accordion-item">
-          <h2 className="accordion-header">
-            <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-              open(array $attributes = [])
-            </button>
-          </h2>
-          <div id="collapseOne" className="accordion-collapse collapse show" data-bs-parent="#apiAccordion">
-            <div className="accordion-body">
-              <p>Opens a form with the specified attributes.</p>
-              <h5>Parameters</h5>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>$attributes</td>
-                    <td>array</td>
-                    <td>
-                      <p>Form attributes and settings:</p>
-                      <ul>
-                        <li><code>id</code>: Form ID (optional, auto-generated if not provided)</li>
-                        <li><code>method</code>: HTTP method (GET, POST, PUT, DELETE)</li>
-                        <li><code>action</code>: Form submission URL</li>
-                        <li><code>enctype</code>: Form encoding type</li>
-                        <li><code>files</code>: Whether form includes file uploads (boolean)</li>
-                        <li><code>css_framework</code>: CSS framework to use (bootstrap, tailwind, bulma)</li>
-                        <li><code>theme_mode</code>: Theme mode (light, dark)</li>
-                      </ul>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <h5>Example</h5>
-              <SyntaxHighlighter language="php" style={codeStyle}>
-{`$form->open([
-    'action' => route('users.store'),
-    'method' => 'POST',
-    'files' => true,
-    'css_framework' => 'bootstrap',
-    'theme_mode' => 'light'
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Common Element Attributes</h2>
+          <p>These attributes are common to most form elements:</p>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`$form->text('name', 'Default value', [
+    'id' => 'custom-id', // Element ID (optional, auto-generated if not provided)
+    'label' => 'Custom Label', // Custom label text or false to hide label
+    'placeholder' => 'Enter your name', // Placeholder text
+    'required' => true, // Whether field is required (boolean)
+    'disabled' => false, // Whether field is disabled (boolean)
+    'readonly' => false, // Whether field is readonly (boolean)
+    'class' => 'custom-class', // Additional CSS classes
+    'data-*' => 'value' // Custom data attributes
 ]);`}
-              </SyntaxHighlighter>
-            </div>
-          </div>
+          </SyntaxHighlighter>
         </div>
-        
-        <div className="accordion-item">
-          <h2 className="accordion-header">
-            <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-              close($submitText = 'Submit', array $attributes = [])
-            </button>
-          </h2>
-          <div id="collapseTwo" className="accordion-collapse collapse" data-bs-parent="#apiAccordion">
-            <div className="accordion-body">
-              <p>Closes a form and optionally adds a submit button.</p>
-              <h5>Parameters</h5>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>$submitText</td>
-                    <td>string|null</td>
-                    <td>Text for the submit button, or null to omit button</td>
-                  </tr>
-                  <tr>
-                    <td>$attributes</td>
-                    <td>array</td>
-                    <td>Additional attributes for the submit button</td>
-                  </tr>
-                </tbody>
-              </table>
-              <h5>Example</h5>
-              <SyntaxHighlighter language="php" style={codeStyle}>
-{`// With default submit button
-$form->close();
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Validation Rules</h2>
+          <p>You can set validation rules for any form element:</p>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// String format
+$form->text('username')->rules('required|alpha_dash|min:3|max:20');
 
-// With custom submit button text
-$form->close('Save User');
-
-// With custom attributes
-$form->close('Submit', [
-    'class' => 'btn btn-lg btn-success'
+// Array format
+$form->email('email')->rules([
+    'required',
+    'email',
+    'unique:users,email'
 ]);
 
-// Without submit button
-$form->close(null);`}
-              </SyntaxHighlighter>
-            </div>
-          </div>
+// With custom error messages
+$form->password('password')->rules('required|min:8', [
+    'required' => 'The password field is required.',
+    'min' => 'The password must be at least :min characters.'
+]);`}
+          </SyntaxHighlighter>
         </div>
-        
-        {/* Add more API documentation items here */}
+      </div>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <h2 className="h4 mb-3">Configuration</h2>
+          <p>You can publish and modify the configuration file:</p>
+          <SyntaxHighlighter language="php" style={codeStyle}>
+{`// config/realments.php
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Default CSS Framework
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the default CSS framework that will be used for
+    | all form elements. Supported: "bootstrap", "tailwind", "bulma".
+    |
+    */
+    'default_css_framework' => 'bootstrap',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Theme Mode
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the default theme mode that will be used for
+    | all form elements. Supported: "light", "dark".
+    |
+    */
+    'default_theme_mode' => 'light',
+
+    /*
+    |--------------------------------------------------------------------------
+    | reCAPTCHA Site Key
+    |--------------------------------------------------------------------------
+    |
+    | This option specifies the reCAPTCHA site key for the captcha element.
+    |
+    */
+    'recaptcha_site_key' => env('RECAPTCHA_SITE_KEY', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | WYSIWYG Editor Default
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the default WYSIWYG editor that will be used for
+    | textarea elements with WYSIWYG enabled. Supported: "tinymce", "ckeditor", "quill".
+    |
+    */
+    'wysiwyg_editor_default' => 'tinymce',
+];`}
+          </SyntaxHighlighter>
+        </div>
       </div>
     </div>
   );
 };
 
 // Initialize the app
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+document.addEventListener('DOMContentLoaded', function() {
+  const root = document.getElementById('root');
+  ReactDOM.render(<App />, root);
+});

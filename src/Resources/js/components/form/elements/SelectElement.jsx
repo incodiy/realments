@@ -140,7 +140,7 @@ const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }
         classes.label = 'block text-gray-700 text-sm font-bold mb-2';
         classes.select = `block appearance-none w-full bg-white border ${errorMessage ? 'border-red-500' : 'border-gray-400'} hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline`;
         classes.error = 'text-red-500 text-xs italic';
-        classes.button = `bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm ${add_button?.class || ''}`;
+        classes.button = `bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm ${add_button?.className || ''}`;
         classes.buttonRemove = 'bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm ml-2';
         break;
       case 'bulma':
@@ -148,7 +148,7 @@ const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }
         classes.label = 'label';
         classes.select = `select ${errorMessage ? 'is-danger' : ''}`;
         classes.error = 'help is-danger';
-        classes.button = `button is-small ${add_button?.class || 'is-primary'}`;
+        classes.button = `button is-small ${add_button?.className || 'is-primary'}`;
         classes.buttonRemove = 'button is-small is-danger ml-2';
         break;
       default:
@@ -190,27 +190,41 @@ const SelectElement = ({ element, errorMessage, value, cssFramework, themeMode }
     const selectId = itemIndex !== null ? `${attributes.id}_${itemIndex}` : attributes.id;
     const selectName = itemIndex !== null ? `${name}[${itemIndex}]${multiselect ? '[]' : ''}` : `${name}${multiselect ? '[]' : ''}`;
     
+    // Extract React-specific props from attributes
+    const { className, ...otherAttributes } = attributes;
+    
+    // Convert boolean attributes to string for DOM properties
+    const multiselectStr = multiselect ? "true" : undefined;
+    const addButtonStr = add_button?.enabled ? "true" : undefined;
+    
     return (
       <select
         id={selectId}
         name={selectName}
-        className={`${classes.select} ${attributes.class || ''}`}
+        className={`${classes.select} ${className || ''}`}
         multiple={multiselect}
         onChange={(e) => handleChange(e, itemIndex)}
-        {...attributes}
+        {...otherAttributes}
       >
-        {options.map((option, optionIndex) => (
-          <option
-            key={`option-${optionIndex}`}
-            value={option.value}
-            selected={values.includes(option.value)}
-          >
-            {option.label}
-          </option>
-        ))}
+        {options.map((option, optionIndex) => {
+          // Use defaultValue or value instead of selected attribute
+          const isSelected = values.includes(option.value);
+          return (
+            <option
+              key={`option-${optionIndex}`}
+              value={option.value}
+              // React uses defaultValue or value on the select element instead of selected on options
+            >
+              {option.label}
+            </option>
+          );
+        })}
       </select>
     );
   };
+  
+  // Set the default value for the select element
+  const defaultValue = selectedValues.length > 0 ? (multiselect ? selectedValues : selectedValues[0]) : undefined;
   
   return (
     <div className={classes.formGroup}>
