@@ -44,8 +44,3 @@
 - [x] Uji build assets melalui npm
 - [x] Uji render semua elemen form di browser
 - [x] Uji validasi client-side dan server-side
-
-## Pelaporan dan Pengiriman
-- [x] Buat arsip package yang sudah direvisi
-- [x] Kirim semua file yang diperbarui ke user
-- [x] Berikan laporan detail tentang perubahan yang dilakukan

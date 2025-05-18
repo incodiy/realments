@@ -8,6 +8,9 @@
     @include('realments::partials.head')
 </head>
 <body>
-    @include('realments::partials.scripts')
+    @if(isset($form))
+    {!! $form !!}
+    @endif
+    <!-- @include('realments::partials.scripts') -->
 </body>
 </html>
