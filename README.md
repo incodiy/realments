@@ -69,7 +69,7 @@ Setelah menginstal package melalui Composer, Anda perlu menginstal dependensi NP
 cd /path/to/your/laravel/project
 
 # Instal dependensi NPM
-npm install
+npm install --save-dev vite @vitejs/plugin-react tailwindcss postcss autoprefixer laravel-vite-plugin axios tailwindcss postcss autoprefixer
 
 # Build assets untuk production
 npm run build
